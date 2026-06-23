@@ -21,7 +21,7 @@ export default function SellerDashboard() {
   const [storeError, setStoreError] = useState('');
 
   // Product form state
-  const [productForm, setProductForm] = useState({ id: '', name: '', description: '', price: '', stock: '', image_url: '' });
+  const [productForm, setProductForm] = useState({ id: '', name: '', description: '', price: '', stock: '', image_url: '', category: 'OTHER' });
   const [isProductSubmitting, setIsProductSubmitting] = useState(false);
   const [productError, setProductError] = useState('');
   const [isEditingProduct, setIsEditingProduct] = useState(false);
@@ -74,7 +74,7 @@ export default function SellerDashboard() {
   };
 
   const resetProductForm = () => {
-    setProductForm({ id: '', name: '', description: '', price: '', stock: '', image_url: '' });
+    setProductForm({ id: '', name: '', description: '', price: '', stock: '', image_url: '', category: 'OTHER' });
     setIsEditingProduct(false);
     setProductError('');
   };
@@ -116,7 +116,8 @@ export default function SellerDashboard() {
       description: prod.description,
       price: prod.price,
       stock: prod.stock,
-      image_url: prod.image_url || ''
+      image_url: prod.image_url || '',
+      category: prod.category || 'OTHER'
     });
     setIsEditingProduct(true);
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -247,6 +248,21 @@ export default function SellerDashboard() {
                         <div className="space-y-2">
                           <Label>Stock</Label>
                           <Input required type="number" min={isEditingProduct ? 0 : 1} value={productForm.stock} onChange={e => setProductForm({...productForm, stock: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Category</Label>
+                          <select 
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            value={productForm.category}
+                            onChange={e => setProductForm({...productForm, category: e.target.value})}
+                          >
+                            <option value="FISHING_GEAR">Fishing Gear</option>
+                            <option value="DIVING_GEAR">Diving Gear</option>
+                            <option value="MARINE_EQUIPMENT">Marine Equipment</option>
+                            <option value="OCEAN_APPAREL">Ocean Apparel</option>
+                            <option value="OCEAN_ACCESSORIES">Ocean Accessories</option>
+                            <option value="OTHER">Other</option>
+                          </select>
                         </div>
                         <div className="space-y-2">
                           <Label>Image URL (Optional)</Label>

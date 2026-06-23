@@ -60,7 +60,12 @@ export default function ProductsPage() {
                 )}
               </div>
               <CardHeader className="pb-2">
-                <div className="text-xs font-medium text-primary mb-1 line-clamp-1">{product.store?.name || 'Unknown Store'}</div>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs font-medium text-primary line-clamp-1">{product.store?.name || 'Unknown Store'}</div>
+                  <div className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-full text-slate-500 uppercase tracking-wide">
+                    {product.category?.replace('_', ' ')}
+                  </div>
+                </div>
                 <CardTitle className="text-lg line-clamp-1">{product.name}</CardTitle>
               </CardHeader>
               <CardContent className="mt-auto">

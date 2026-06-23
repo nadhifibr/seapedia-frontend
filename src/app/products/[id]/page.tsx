@@ -68,6 +68,9 @@ export default function ProductDetailPage() {
         <div className="flex flex-col">
           <div className="mb-6">
             <h1 className="text-4xl font-extrabold text-slate-900 mb-2">{product.name}</h1>
+            <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-600 mb-4">
+              {product.category?.replace('_', ' ')}
+            </div>
             <div className="text-3xl font-bold text-primary mb-4">${Number(product.price).toFixed(2)}</div>
             
             <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-6 ${product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
