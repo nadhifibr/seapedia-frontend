@@ -12,10 +12,35 @@ export default function SellerOrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [expandedOrderIds, setExpandedOrderIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  const handleProcessOrder = async (orderId: string) => {
+    setIsProcessing(orderId);
+    try {
+      await api.post(`/orders/incoming/${orderId}/process/`);
+      fetchOrders(); // Refetch to get updated status_history
+    } catch (err: any) {
+      console.error('Failed to process order', err);
+      alert(err.response?.data?.detail || 'Failed to process order.');
+    } finally {
+      setIsProcessing(null);
+    }
+  };
+
+  const toggleExpand = (orderId: string) => {
+    const newSet = new Set(expandedOrderIds);
+    if (newSet.has(orderId)) {
+      newSet.delete(orderId);
+    } else {
+      newSet.add(orderId);
+    }
+    setExpandedOrderIds(newSet);
+  };
 
   const fetchOrders = async () => {
     try {
@@ -116,17 +141,50 @@ export default function SellerOrdersPage() {
                       </div>
                       <div className="mt-4 flex flex-col gap-2">
                         {order.status === 'SEDANG_DIKEMAS' && (
-                          <Button className="w-full">
-                            Request Driver
+                          <Button 
+                            className="w-full"
+                            onClick={() => handleProcessOrder(order.id)}
+                            disabled={isProcessing === order.id}
+                          >
+                            {isProcessing === order.id ? 'Processing...' : 'Request Driver'}
                           </Button>
                         )}
-                        <Button variant="outline" className="w-full" disabled>
-                          View Details
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => toggleExpand(order.id)}
+                        >
+                          {expandedOrderIds.has(order.id) ? 'Hide Details' : 'View Details'}
                         </Button>
                       </div>
                     </div>
                   </div>
                 </CardContent>
+                {expandedOrderIds.has(order.id) && (
+                  <div className="bg-slate-50 border-t p-6">
+                    <h4 className="font-semibold text-slate-800 flex items-center gap-2 mb-4">
+                      <Clock className="w-4 h-4 text-primary" /> Order Timeline
+                    </h4>
+                    <div className="space-y-4">
+                      {order.status_history?.map((history: any, index: number) => (
+                        <div key={index} className="flex gap-4 relative">
+                          {index !== order.status_history.length - 1 && (
+                            <div className="absolute left-1.5 top-6 bottom-[-24px] w-0.5 bg-slate-200"></div>
+                          )}
+                          <div className="w-3 h-3 rounded-full bg-primary mt-1.5 shrink-0 relative z-10 ring-4 ring-slate-50"></div>
+                          <div>
+                            <p className="font-semibold text-slate-800 text-sm">{history.status}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{new Date(history.changed_at).toLocaleString()}</p>
+                            {history.note && <p className="text-xs text-slate-600 mt-1">{history.note}</p>}
+                          </div>
+                        </div>
+                      ))}
+                      {(!order.status_history || order.status_history.length === 0) && (
+                        <p className="text-sm text-slate-500">No history available.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </Card>
             ))}
           </div>

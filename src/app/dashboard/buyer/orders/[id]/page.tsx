@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/shared/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,21 +8,19 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Package, Clock, CheckCircle2, MapPin, CreditCard, Store } from 'lucide-react';
 import api from '@/lib/api';
 
-export default function BuyerOrderDetailPage({ params }: { params: { id: string } }) {
+export default function BuyerOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { id } = use(params);
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // In Next.js App router, params might need to be resolved or accessed directly. 
-  // For basic strings, params.id works fine if the component is Server Component, 
-  // but for 'use client', standard destructing works in simple Next versions.
   useEffect(() => {
     fetchOrderDetails();
-  }, [params.id]);
+  }, [id]);
 
   const fetchOrderDetails = async () => {
     try {
-      const res = await api.get(`/orders/${params.id}/`);
+      const res = await api.get(`/orders/${id}/`);
       setOrder(res.data);
     } catch (err) {
       console.error('Failed to fetch order details', err);

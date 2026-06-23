@@ -128,9 +128,14 @@ export default function SellerDashboard() {
   return (
     <ProtectedRoute>
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Seller Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, <strong>{user?.username}</strong>!</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Seller Dashboard</h1>
+            <p className="text-muted-foreground">Welcome back, <strong>{user?.username}</strong>!</p>
+          </div>
+          <Button variant="outline" onClick={() => window.location.href = '/dashboard/seller/orders'}>
+            View Store Orders
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

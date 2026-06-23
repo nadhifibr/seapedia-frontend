@@ -54,6 +54,13 @@ export function Navbar() {
                     </Button>
                   </Link>
                 )}
+                {user?.active_role && (
+                  <Link href={`/dashboard/${user.active_role.toLowerCase()}/orders`}>
+                    <Button variant="ghost" size="sm" className="hidden md:flex hover:bg-primary/10 hover:text-primary">
+                      Orders
+                    </Button>
+                  </Link>
+                )}
                 <Link href={getDashboardPath()}>
                   <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary">
                     <UserIcon className="h-5 w-5" />
