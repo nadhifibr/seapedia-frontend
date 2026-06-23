@@ -1,0 +1,135 @@
+'use client';
+
+import { useState, useEffect, use } from 'react';
+import { useRouter } from 'next/navigation';
+import { ProtectedRoute } from '@/components/shared/ProtectedRoute';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, MapPin, Package, DollarSign, Store, CheckCircle } from 'lucide-react';
+import api from '@/lib/api';
+
+export default function DriverJobDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
+  const { id } = use(params);
+  const [job, setJob] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchJobDetails();
+  }, [id]);
+
+  const fetchJobDetails = async () => {
+    try {
+      const res = await api.get(`/deliveries/jobs/${id}/`);
+      setJob(res.data);
+    } catch (err) {
+      console.error('Failed to fetch job details', err);
+      alert('Failed to load job details.');
+      router.push('/dashboard/driver');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="max-w-7xl mx-auto px-4 py-24 text-center">Loading Job Details...</div>;
+  }
+
+  if (!job) return null;
+
+  return (
+    <ProtectedRoute>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <Button variant="ghost" onClick={() => router.push('/dashboard/driver')} className="mb-6 -ml-4">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+        </Button>
+
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800">Job Details</h1>
+            <p className="text-slate-500 mt-1">Delivery Method: <span className="font-semibold text-slate-700">{job.delivery_method}</span></p>
+          </div>
+          <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg flex items-center gap-2 border border-green-200">
+            <DollarSign className="w-5 h-5" />
+            <span className="text-2xl font-black">Rp {Number(job.driver_earning).toLocaleString('id-ID')}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Route Info */}
+          <Card className="md:col-span-2 border-slate-200 shadow-sm">
+            <CardHeader className="bg-slate-50 pb-4 border-b">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-primary" /> Delivery Route
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="relative pl-8 space-y-8 before:absolute before:inset-0 before:ml-[1.4rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                
+                {/* Pickup */}
+                <div className="relative">
+                  <div className="absolute -left-10 bg-primary w-6 h-6 rounded-full border-4 border-white shadow flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-primary">Pickup at Store</span>
+                    <h3 className="font-bold text-lg text-slate-800 mt-1 flex items-center gap-2">
+                      <Store className="w-4 h-4 text-slate-400" /> {job.store_name}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Dropoff */}
+                <div className="relative">
+                  <div className="absolute -left-10 bg-green-500 w-6 h-6 rounded-full border-4 border-white shadow flex items-center justify-center">
+                    <CheckCircle className="w-3 h-3 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-green-600">Deliver to Buyer</span>
+                    <h3 className="font-bold text-lg text-slate-800 mt-1">{job.buyer_name}</h3>
+                    <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{job.buyer_address}</p>
+                  </div>
+                </div>
+
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Package Contents */}
+          <Card className="md:col-span-2 border-slate-200 shadow-sm">
+            <CardHeader className="bg-slate-50 pb-4 border-b">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Package className="w-5 h-5 text-slate-600" /> Package Contents
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-4">
+              {job.items?.map((item: any) => (
+                <div key={item.id} className="flex items-center gap-4 p-3 border rounded-lg bg-white">
+                  <div className="w-12 h-12 bg-slate-100 rounded border overflow-hidden shrink-0">
+                    {item.product_image ? (
+                      <img src={item.product_image} alt={item.product_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">No Img</div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-slate-800">{item.product_name}</p>
+                    <p className="text-xs text-slate-500">{item.quantity} items</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+          
+          <div className="md:col-span-2 mt-4">
+            <Button className="w-full h-14 text-lg font-bold" size="lg" disabled>
+              Take Job (Coming Soon)
+            </Button>
+            <p className="text-center text-xs text-slate-500 mt-3">You can review the details before accepting.</p>
+          </div>
+
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+}
