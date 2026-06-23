@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Wallet, MapPin, Trash2, CheckCircle2 } from 'lucide-react';
+import { Wallet, MapPin, Trash2, CheckCircle2, TrendingDown } from 'lucide-react';
 
 export default function BuyerDashboard() {
   const { user, fetchProfile } = useAuthStore();
@@ -24,10 +24,23 @@ export default function BuyerDashboard() {
   const [addressForm, setAddressForm] = useState({ label: '', full_address: '', is_default: false });
   const [isAddingAddress, setIsAddingAddress] = useState(false);
 
+  // Report State
+  const [report, setReport] = useState<{total_spent: number, total_orders: number}>({ total_spent: 0, total_orders: 0 });
+
   useEffect(() => {
     fetchWalletData();
     fetchAddresses();
+    fetchReport();
   }, []);
+
+  const fetchReport = async () => {
+    try {
+      const res = await api.get('/orders/report/');
+      setReport(res.data);
+    } catch (err) {
+      console.error('Failed to fetch report', err);
+    }
+  };
 
   const fetchWalletData = async () => {
     try {
@@ -143,6 +156,28 @@ export default function BuyerDashboard() {
                     {isToppingUp ? 'Processing...' : 'Top Up'}
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+
+            {/* EXPENSE SUMMARY */}
+            <Card className="border-red-200/50 shadow-sm overflow-hidden">
+              <CardHeader className="bg-red-50/50 pb-4">
+                <CardTitle className="flex items-center gap-2 text-red-600">
+                  <TrendingDown className="w-5 h-5" /> Expense Summary
+                </CardTitle>
+                <CardDescription>Your total spending on active orders</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-slate-500">Total Spent</span>
+                  <span className="text-4xl font-extrabold text-slate-800">
+                    Rp {Number(report.total_spent).toLocaleString('id-ID')}
+                  </span>
+                </div>
+                <div className="mt-4 pt-4 border-t flex justify-between items-center text-sm">
+                  <span className="text-slate-600">Active/Completed Orders</span>
+                  <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-full">{report.total_orders}</span>
+                </div>
               </CardContent>
             </Card>
 

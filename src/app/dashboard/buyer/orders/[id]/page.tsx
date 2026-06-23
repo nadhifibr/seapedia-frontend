@@ -140,6 +140,12 @@ export default function BuyerOrderDetailPage({ params }: { params: Promise<{ id:
                   <span>Subtotal</span>
                   <span className="font-medium text-slate-800">Rp {Number(order.subtotal).toLocaleString('id-ID')}</span>
                 </div>
+                {Number(order.discount_amount) > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount {order.discount_type ? `(${order.discount_type})` : ''}</span>
+                    <span className="font-medium">-Rp {Number(order.discount_amount).toLocaleString('id-ID')}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Delivery Fee</span>
                   <span className="font-medium text-slate-800">Rp {Number(order.delivery_fee).toLocaleString('id-ID')}</span>

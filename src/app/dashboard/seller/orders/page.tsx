@@ -133,11 +133,42 @@ export default function SellerOrdersPage() {
                     
                     <div className="w-full md:w-64 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6 flex flex-col justify-between">
                       <div>
-                        <p className="text-xs text-slate-500 mb-1">Total Payment</p>
-                        <p className="font-bold text-xl text-primary">Rp {Number(order.total).toLocaleString('id-ID')}</p>
-                        <p className="text-xs text-slate-400 mt-2 line-clamp-2" title={order.address_snapshot}>
-                          Deliver to: {order.address_snapshot}
-                        </p>
+                        <p className="text-xs font-semibold text-slate-600 mb-2 border-b pb-1">Payment Breakdown</p>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex justify-between text-slate-600">
+                            <span>Subtotal</span>
+                            <span>Rp {Number(order.subtotal).toLocaleString('id-ID')}</span>
+                          </div>
+                          {Number(order.discount_amount) > 0 && (
+                            <div className="flex justify-between text-green-600">
+                              <span>Discount {order.discount_type ? `(${order.discount_type})` : ''}</span>
+                              <span>-Rp {Number(order.discount_amount).toLocaleString('id-ID')}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-slate-600">
+                            <span>Delivery Fee</span>
+                            <span>Rp {Number(order.delivery_fee).toLocaleString('id-ID')}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-600">
+                            <span>Tax (PPN)</span>
+                            <span>Rp {Number(order.tax_amount).toLocaleString('id-ID')}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-primary border-t pt-1 mt-1">
+                            <span>Total Paid by Buyer</span>
+                            <span>Rp {Number(order.total).toLocaleString('id-ID')}</span>
+                          </div>
+                          <div className="flex justify-between font-bold text-green-700 bg-green-50 p-1.5 rounded mt-2">
+                            <span>Your Revenue</span>
+                            <span>Rp {Number(order.subtotal - order.discount_amount).toLocaleString('id-ID')}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 bg-slate-50 p-2 rounded border border-slate-100">
+                          <p className="text-xs font-semibold text-slate-600 mb-1">Deliver to:</p>
+                          <p className="text-xs text-slate-500 line-clamp-2" title={order.address_snapshot}>
+                            {order.address_snapshot}
+                          </p>
+                        </div>
                       </div>
                       <div className="mt-4 flex flex-col gap-2">
                         {order.status === 'SEDANG_DIKEMAS' && (

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TrendingUp } from 'lucide-react';
 
 export default function SellerDashboard() {
   const { user } = useAuthStore();
@@ -26,9 +27,22 @@ export default function SellerDashboard() {
   const [productError, setProductError] = useState('');
   const [isEditingProduct, setIsEditingProduct] = useState(false);
 
+  // Report State
+  const [report, setReport] = useState<{total_revenue: number, total_orders: number}>({ total_revenue: 0, total_orders: 0 });
+
   useEffect(() => {
     fetchStore();
+    fetchReport();
   }, []);
+
+  const fetchReport = async () => {
+    try {
+      const res = await api.get('/orders/incoming/report/');
+      setReport(res.data);
+    } catch (err) {
+      console.error('Failed to fetch report', err);
+    }
+  };
 
   const fetchStore = async () => {
     try {
@@ -139,8 +153,30 @@ export default function SellerDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Store Management */}
+          {/* Store Management & Summary */}
           <div className="lg:col-span-1 space-y-6">
+            {/* REVENUE SUMMARY */}
+            <Card className="border-green-200/50 shadow-sm overflow-hidden">
+              <CardHeader className="bg-green-50/50 pb-4">
+                <CardTitle className="flex items-center gap-2 text-green-600">
+                  <TrendingUp className="w-5 h-5" /> Revenue Summary
+                </CardTitle>
+                <CardDescription>Income from active and completed orders</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-slate-500">Total Product Revenue</span>
+                  <span className="text-4xl font-extrabold text-slate-800">
+                    Rp {Number(report.total_revenue).toLocaleString('id-ID')}
+                  </span>
+                </div>
+                <div className="mt-4 pt-4 border-t flex justify-between items-center text-sm">
+                  <span className="text-slate-600">Active/Completed Orders</span>
+                  <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-full">{report.total_orders}</span>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>{store ? 'Manage Store' : 'Create Store'}</CardTitle>
