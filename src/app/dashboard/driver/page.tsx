@@ -120,6 +120,48 @@ export default function DriverDashboard() {
             ))}
           </div>
         )}
+
+        {/* Job History */}
+        <div className="mt-12">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Package className="w-5 h-5 text-slate-500" /> Job History
+          </h2>
+          
+          {jobs.filter(j => j.status === 'DONE').length === 0 ? (
+            <div className="text-center py-8 bg-slate-50 border rounded-lg text-slate-500">
+              You haven't completed any jobs yet.
+            </div>
+          ) : (
+            <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 border-b text-slate-600">
+                  <tr>
+                    <th className="px-6 py-4 font-medium">Completed Date</th>
+                    <th className="px-6 py-4 font-medium">Store</th>
+                    <th className="px-6 py-4 font-medium">Buyer</th>
+                    <th className="px-6 py-4 font-medium text-right">Earning (Delivery Fee)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {jobs.filter(j => j.status === 'DONE').map((job) => (
+                    <tr key={job.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 text-slate-500">
+                        {new Date(job.completed_at).toLocaleDateString('id-ID', {
+                          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-800">{job.store_name}</td>
+                      <td className="px-6 py-4 text-slate-600">{job.buyer_name}</td>
+                      <td className="px-6 py-4 text-right font-bold text-green-600">
+                        + Rp {Number(job.driver_earning).toLocaleString('id-ID')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </ProtectedRoute>
   );
