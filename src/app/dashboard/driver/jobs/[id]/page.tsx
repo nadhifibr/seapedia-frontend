@@ -13,6 +13,7 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
   const { id } = use(params);
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     fetchJobDetails();
@@ -28,6 +29,30 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
       router.push('/dashboard/driver');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleTakeJob = async () => {
+    try {
+      setIsProcessing(true);
+      await api.post(`/deliveries/jobs/${id}/take/`);
+      await fetchJobDetails();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Failed to take job.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCompleteJob = async () => {
+    try {
+      setIsProcessing(true);
+      await api.post(`/deliveries/jobs/${id}/complete/`);
+      await fetchJobDetails();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Failed to complete job.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -122,10 +147,29 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
           </Card>
           
           <div className="md:col-span-2 mt-4">
-            <Button className="w-full h-14 text-lg font-bold" size="lg" disabled>
-              Take Job (Coming Soon)
-            </Button>
-            <p className="text-center text-xs text-slate-500 mt-3">You can review the details before accepting.</p>
+            {job.status === 'AVAILABLE' && (
+              <>
+                <Button className="w-full h-14 text-lg font-bold" size="lg" onClick={handleTakeJob} disabled={isProcessing}>
+                  {isProcessing ? 'Processing...' : 'Take Job'}
+                </Button>
+                <p className="text-center text-xs text-slate-500 mt-3">You can review the details before accepting.</p>
+              </>
+            )}
+            {job.status === 'TAKEN' && (
+              <>
+                <Button className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700" size="lg" onClick={handleCompleteJob} disabled={isProcessing}>
+                  {isProcessing ? 'Processing...' : 'Mark as Delivered'}
+                </Button>
+                <p className="text-center text-xs text-slate-500 mt-3">Only click this after you have handed the package to the buyer.</p>
+              </>
+            )}
+            {job.status === 'DONE' && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                <h3 className="text-xl font-bold text-green-800">Job Completed</h3>
+                <p className="text-green-600 mt-1">Earnings have been added to your profile.</p>
+              </div>
+            )}
           </div>
 
         </div>

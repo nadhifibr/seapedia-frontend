@@ -51,22 +51,47 @@ export default function DriverDashboard() {
           </Card>
         </div>
 
+        {jobs.find(j => j.status === 'TAKEN') && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-orange-600">
+              <Package className="w-5 h-5" /> Active Delivery
+            </h2>
+            <Card className="border-orange-200 shadow-md">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                  <div>
+                    <h3 className="font-bold text-lg text-slate-800">You have an ongoing delivery</h3>
+                    <p className="text-slate-600">Please complete your current delivery before taking another job.</p>
+                  </div>
+                  <Button 
+                    size="lg"
+                    className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white"
+                    onClick={() => router.push(`/dashboard/driver/jobs/${jobs.find(j => j.status === 'TAKEN').id}`)}
+                  >
+                    View Active Job <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
           <Package className="w-5 h-5 text-primary" /> Available Jobs
         </h2>
         
         {isLoading ? (
           <div className="text-center py-12 text-slate-500">Loading jobs...</div>
-        ) : jobs.length === 0 ? (
+        ) : jobs.filter(j => j.status === 'AVAILABLE').length === 0 ? (
           <div className="text-center py-12 bg-slate-50 border border-dashed rounded-lg">
             <Package className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-slate-700">No jobs available</h3>
+            <h3 className="text-lg font-medium text-slate-700">No available jobs right now</h3>
             <p className="text-slate-500">Check back later when sellers process new orders.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {jobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition-shadow flex flex-col">
+            {jobs.filter(j => j.status === 'AVAILABLE').map((job) => (
+              <Card key={job.id} className="hover:shadow-md transition-shadow flex flex-col opacity-100">
                 <CardHeader className="pb-3 border-b">
                   <div className="flex justify-between items-start">
                     <div>
