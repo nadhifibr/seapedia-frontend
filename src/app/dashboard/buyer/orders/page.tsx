@@ -20,7 +20,13 @@ export default function BuyerOrdersPage() {
   const fetchOrders = async () => {
     try {
       const res = await api.get('/orders/');
-      setOrders(res.data);
+      if (Array.isArray(res.data)) {
+        setOrders(res.data);
+      } else if (res.data && Array.isArray(res.data.results)) {
+        setOrders(res.data.results);
+      } else {
+        setOrders([]);
+      }
     } catch (err) {
       console.error('Failed to fetch orders', err);
     } finally {

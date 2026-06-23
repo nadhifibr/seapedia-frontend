@@ -17,13 +17,18 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [discountCodeInput, setDiscountCodeInput] = useState('');
+  const [appliedDiscountCode, setAppliedDiscountCode] = useState('');
+  const [discountError, setDiscountError] = useState('');
+  const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
+
   useEffect(() => {
     fetchAddresses();
   }, []);
 
   useEffect(() => {
     fetchSummary();
-  }, [deliveryMethod, selectedAddressId]);
+  }, [deliveryMethod, selectedAddressId, appliedDiscountCode]);
 
   const fetchAddresses = async () => {
     try {
@@ -45,15 +50,36 @@ export default function CheckoutPage() {
       if (selectedAddressId) {
         url += `&address_id=${selectedAddressId}`;
       }
+      if (appliedDiscountCode) {
+        url += `&discount_code=${appliedDiscountCode}`;
+      }
       const res = await api.get(url);
       setSummary(res.data);
+      setDiscountError('');
     } catch (err: any) {
       console.error('Failed to fetch summary', err);
       if (err.response?.status === 400 && err.response?.data?.detail === 'Cart is empty.') {
         router.push('/cart');
+      } else if (err.response?.status === 400 && appliedDiscountCode) {
+         setDiscountError(err.response?.data?.detail || 'Invalid discount code');
+         setAppliedDiscountCode('');
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleApplyDiscount = async () => {
+    if (!discountCodeInput) return;
+    setIsApplyingDiscount(true);
+    setDiscountError('');
+    try {
+      await api.get(`/discounts/validate/?code=${discountCodeInput}`);
+      setAppliedDiscountCode(discountCodeInput);
+    } catch (err: any) {
+      setDiscountError(err.response?.data?.detail || 'Invalid discount code.');
+    } finally {
+      setIsApplyingDiscount(false);
     }
   };
 
@@ -67,7 +93,8 @@ export default function CheckoutPage() {
       setIsSubmitting(true);
       await api.post('/orders/checkout/', {
         delivery_method: deliveryMethod,
-        address_id: selectedAddressId
+        address_id: selectedAddressId,
+        discount_code: appliedDiscountCode
       });
       alert('Order placed successfully!');
       router.push('/dashboard/buyer/orders');
@@ -200,8 +227,40 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* Payment Summary */}
-          <div>
+          {/* Sidebar Area: Discount & Payment Summary */}
+          <div className="space-y-6">
+            
+            {/* Discount Code Section */}
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="bg-slate-50 border-b py-3">
+                <CardTitle className="text-lg">Voucher & Promo</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={discountCodeInput}
+                    onChange={(e) => setDiscountCodeInput(e.target.value.toUpperCase())}
+                    placeholder="Enter code"
+                    className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 uppercase"
+                  />
+                  <Button onClick={handleApplyDiscount} disabled={isApplyingDiscount || !discountCodeInput}>
+                    {isApplyingDiscount ? '...' : 'Apply'}
+                  </Button>
+                </div>
+                {discountError && <p className="text-xs text-red-500 font-medium mt-1">{discountError}</p>}
+                {appliedDiscountCode && summary?.discount_amount > 0 && (
+                  <div className="bg-green-50 border border-green-200 text-green-700 p-2 rounded-md text-sm mt-2 flex justify-between items-center">
+                    <span>Applied: <strong>{appliedDiscountCode}</strong></span>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 text-red-600 hover:text-red-800 hover:bg-red-50" onClick={() => { setAppliedDiscountCode(''); setDiscountCodeInput(''); }}>
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Payment Summary */}
             <Card className="sticky top-24 shadow-md border-primary/20">
               <CardHeader className="bg-primary/5 pb-4">
                 <CardTitle>Payment Summary</CardTitle>
@@ -213,6 +272,12 @@ export default function CheckoutPage() {
                       <span>Subtotal</span>
                       <span className="font-medium text-slate-800">Rp {Number(summary.subtotal).toLocaleString('id-ID')}</span>
                     </div>
+                    {summary.discount_amount > 0 && (
+                      <div className="flex justify-between text-green-600 font-medium">
+                        <span>Discount {summary.discount_type ? `(${summary.discount_type})` : ''}</span>
+                        <span>- Rp {Number(summary.discount_amount).toLocaleString('id-ID')}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span>Delivery Fee</span>
                       <span className="font-medium text-slate-800">Rp {Number(summary.delivery_fee).toLocaleString('id-ID')}</span>
