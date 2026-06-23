@@ -15,6 +15,7 @@ export default function ProductDetailPage() {
   const { user } = useAuthStore();
   const [product, setProduct] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -31,6 +32,31 @@ export default function ProductDetailPage() {
       // fallback or error could be shown
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true);
+    try {
+      await api.post('/cart/items/', { product_id: product.id, quantity: 1 });
+      alert('Product added to cart!');
+    } catch (err: any) {
+      if (err.response?.data?.error_code === 'STORE_CONFLICT') {
+        const confirmClear = confirm(`Your cart already contains items from a different store. Do you want to clear your cart and add this product from ${product.store.name} instead?`);
+        if (confirmClear) {
+          try {
+            await api.delete('/cart/');
+            await api.post('/cart/items/', { product_id: product.id, quantity: 1 });
+            alert('Cart cleared and product added successfully!');
+          } catch (retryErr) {
+            alert('Failed to add product after clearing cart.');
+          }
+        }
+      } else {
+        alert(err.response?.data?.detail || 'Failed to add to cart.');
+      }
+    } finally {
+      setIsAddingToCart(false);
     }
   };
 
@@ -108,8 +134,13 @@ export default function ProductDetailPage() {
 
             {/* Actions */}
             <div className="pt-6 border-t flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="flex-1" disabled={product.stock === 0 || !user || !user.roles.includes('BUYER')}>
-                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart (Coming Soon)'}
+              <Button 
+                size="lg" 
+                className="flex-1" 
+                disabled={product.stock === 0 || !user || !user.roles.includes('BUYER') || isAddingToCart}
+                onClick={handleAddToCart}
+              >
+                {isAddingToCart ? 'Adding...' : (product.stock === 0 ? 'Out of Stock' : 'Add to Cart')}
               </Button>
               {!user && (
                 <div className="text-center sm:text-left text-sm text-slate-500 self-center">

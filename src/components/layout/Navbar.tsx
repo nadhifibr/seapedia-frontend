@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
-import { LogOut, User as UserIcon, Store } from 'lucide-react';
+import { LogOut, User as UserIcon, Store, ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -47,6 +47,13 @@ export function Navbar() {
                 <span className="text-sm font-medium text-muted-foreground hidden md:inline-block">
                   Hi, {user?.username} {user?.active_role && <span className="text-primary font-bold">({user.active_role})</span>}
                 </span>
+                {user?.roles?.includes('BUYER') && (
+                  <Link href="/cart">
+                    <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary">
+                      <ShoppingCart className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                )}
                 <Link href={getDashboardPath()}>
                   <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary">
                     <UserIcon className="h-5 w-5" />
