@@ -16,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SEAPEDIA Marketplace",
-  description: "A multi-role e-commerce platform.",
+  description: "Seapedia is an e-commerce platform that provides various marine-related products, ranging from fishing gear, diving equipment, marine accessories, and ocean lifestyle products. Seapedia connects ocean enthusiasts with reliable products to support their marine activities and adventures.",
+  keywords: ["seapedia", "ecommerce", "marine products", "fishing gear", "diving equipment", "ocean lifestyle", "marketplace"],
 };
 
 export default function RootLayout({
