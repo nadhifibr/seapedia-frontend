@@ -174,8 +174,17 @@ export default function AdminDashboardPage() {
       { header: 'Store', accessor: 'store_name' },
       { header: 'Total', accessor: 'total', render: (val: string) => <span className="font-medium">Rp {val}</span> },
       { header: 'Delivery', accessor: 'delivery_method' },
+      { header: 'Deadline', accessor: 'overdue_at', render: (val: string, row: any) => {
+        if (!val) return '-';
+        const isOverdue = new Date(val) < new Date() && row.status !== 'PESANAN_SELESAI' && row.status !== 'DIKEMBALIKAN';
+        return (
+          <span className={`px-2 py-1 text-xs rounded-full ${isOverdue ? 'bg-red-100 text-red-700 font-bold' : 'bg-slate-100 text-slate-600'}`}>
+            {new Date(val).toLocaleDateString()} {new Date(val).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+          </span>
+        );
+      }},
       { header: 'Status', accessor: 'status', render: (val: string) => (
-        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">{val ? val.replace(/_/g, ' ') : '-'}</span>
+        <span className={`px-2 py-1 text-xs rounded-full ${val === 'DIKEMBALIKAN' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{val ? val.replace(/_/g, ' ') : '-'}</span>
       )}
     ]},
     { id: 'discounts', label: 'Vouchers/Promos', endpoint: 'discounts', columns: [
@@ -195,7 +204,7 @@ export default function AdminDashboardPage() {
       { header: 'Order ID', accessor: 'order_id', render: (val: string) => <span className="text-xs text-slate-500">{val ? val.substring(0, 8) + '...' : '-'}</span> },
       { header: 'Driver', accessor: 'driver_username', render: (val: string) => val || <span className="text-slate-400 italic">Unassigned</span> },
       { header: 'Status', accessor: 'status', render: (val: string) => (
-        <span className={`px-2 py-1 text-xs rounded-full ${val === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+        <span className={`px-2 py-1 text-xs rounded-full ${val === 'DONE' ? 'bg-emerald-100 text-emerald-700' : val === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
           {val || '-'}
         </span>
       )}
@@ -222,13 +231,40 @@ export default function AdminDashboardPage() {
           </h1>
           <p className="text-slate-500 mt-2">Marketplace Overview & Statistics</p>
         </div>
-        <a 
-          href="/dashboard/admin/discounts"
-          className="bg-primary text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
-        >
-          <Ticket className="h-4 w-4" />
-          Manage Discounts
-        </a>
+        <div className="flex gap-2">
+          <button 
+            onClick={async () => {
+              try {
+                await api.post('/admin_panel/orders/trigger-overdue/');
+                alert('Overdue check completed. Refreshing data...');
+                window.location.reload();
+              } catch (e) { alert('Error triggering overdue check'); }
+            }}
+            className="bg-amber-500 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-amber-600 transition-colors flex items-center gap-2"
+          >
+            <AlertTriangle className="h-4 w-4" />
+            Run Overdue Check
+          </button>
+          <button 
+            onClick={async () => {
+              try {
+                await api.post('/admin_panel/orders/simulate-time/', { days: 1 });
+                alert('Simulated +1 day. Refreshing data...');
+                window.location.reload();
+              } catch (e) { alert('Error simulating time'); }
+            }}
+            className="bg-slate-800 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-slate-700 transition-colors flex items-center gap-2"
+          >
+            Simulate +1 Day
+          </button>
+          <a 
+            href="/dashboard/admin/discounts"
+            className="bg-primary text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            <Ticket className="h-4 w-4" />
+            Manage Discounts
+          </a>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-10">
