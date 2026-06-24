@@ -4,20 +4,39 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Fish } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, Fish } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import api from '@/lib/api';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Search, Filter, Sort States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [category, setCategory] = useState('ALL');
+  const [sort, setSort] = useState('newest');
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    // Debounce search input slightly so it doesn't fetch on every keystroke
+    const delayDebounceFn = setTimeout(() => {
+      fetchProducts();
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, category, sort]);
 
   const fetchProducts = async () => {
+    setIsLoading(true);
     try {
-      const res = await api.get('/products/');
+      const res = await api.get('/products/', {
+        params: {
+          q: searchQuery,
+          category: category,
+          sort: sort,
+        }
+      });
       setProducts(res.data);
     } catch (err) {
       console.error('Failed to fetch catalog', err);
@@ -26,9 +45,8 @@ export default function ProductsPage() {
     }
   };
 
-  if (isLoading) {
-    return <div className="max-w-7xl mx-auto px-4 py-12 text-center text-lg">Loading Catalog...</div>;
-  }
+  // Removed strict loading return to prevent UI flickering on search
+  // if (isLoading && products.length === 0) { ... }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -37,7 +55,64 @@ export default function ProductsPage() {
         <p className="text-muted-foreground">Browse our fresh selections from real sellers</p>
       </div>
 
-      {products.length === 0 ? (
+      {/* Control Bar: Search, Filter, Sort */}
+      <div className="flex flex-col md:flex-row gap-4 mb-8 bg-slate-50 p-4 rounded-lg border">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input 
+            type="text" 
+            placeholder="Search products or stores..." 
+            className="pl-9 bg-white"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        <div className="flex gap-4">
+          {/* Category Filter */}
+          <div className="w-40">
+            <Select value={category} onValueChange={(val) => setCategory(val || 'ALL')}>
+              <SelectTrigger className="bg-white">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-slate-500" />
+                  <SelectValue placeholder="Category" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Categories</SelectItem>
+                <SelectItem value="FISHING_GEAR">Fishing Gear</SelectItem>
+                <SelectItem value="DIVING_GEAR">Diving Gear</SelectItem>
+                <SelectItem value="MARINE_EQUIPMENT">Marine Equipment</SelectItem>
+                <SelectItem value="OCEAN_APPAREL">Ocean Apparel</SelectItem>
+                <SelectItem value="OCEAN_ACCESSORIES">Accessories</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Sort */}
+          <div className="w-44">
+            <Select value={sort} onValueChange={(val) => setSort(val || 'newest')}>
+              <SelectTrigger className="bg-white">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-slate-500" />
+                  <SelectValue placeholder="Sort by" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                <SelectItem value="price_desc">Price: High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="py-24 text-center text-slate-500 text-lg">Loading products...</div>
+      ) : products.length === 0 ? (
         <div className="text-center py-24 bg-slate-50 rounded-lg text-slate-500">
           <Fish className="w-16 h-16 mx-auto mb-4 text-slate-300" />
           <h2 className="text-xl font-semibold text-slate-700">No products available yet</h2>
