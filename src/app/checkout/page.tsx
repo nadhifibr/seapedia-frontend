@@ -149,6 +149,7 @@ export default function CheckoutPage() {
                         <div>
                           <p className="font-semibold text-slate-800">{addr.label} {addr.is_default && <span className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded ml-2">Default</span>}</p>
                           <p className="text-sm text-slate-600 mt-1">{addr.full_address}</p>
+                          <p className="text-sm text-slate-500 mt-1">{addr.phone_number}</p>
                         </div>
                       </label>
                     ))}

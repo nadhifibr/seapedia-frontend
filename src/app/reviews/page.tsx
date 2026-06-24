@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Star } from 'lucide-react';
+import api from '@/lib/api';
 
 interface Review {
   id: string;
-  name: string;
+  reviewer_name: string;
   rating: number;
   comment: string;
-  date: string;
+  created_at: string;
 }
 
 export default function AppReviewsPage() {
@@ -20,38 +21,41 @@ export default function AppReviewsPage() {
   const [name, setName] = useState('');
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const saved = localStorage.getItem('seapedia_app_reviews');
-    if (saved) {
-      setReviews(JSON.parse(saved));
-    } else {
-      const initial = [
-        { id: '1', name: 'Alice', rating: 5, comment: 'Great multi-role concept! Very seamless.', date: new Date().toISOString() },
-        { id: '2', name: 'Bob', rating: 4, comment: 'Looking forward to more products being added.', date: new Date().toISOString() },
-      ];
-      setReviews(initial);
-      localStorage.setItem('seapedia_app_reviews', JSON.stringify(initial));
-    }
+    fetchReviews();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const fetchReviews = async () => {
+    try {
+      const response = await api.get('/reviews/');
+      setReviews(response.data);
+    } catch (error) {
+      console.error('Failed to fetch reviews', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newReview: Review = {
-      id: Date.now().toString(),
-      name,
-      rating,
-      comment,
-      date: new Date().toISOString(),
-    };
-    
-    const updated = [newReview, ...reviews];
-    setReviews(updated);
-    localStorage.setItem('seapedia_app_reviews', JSON.stringify(updated));
-    
-    setName('');
-    setComment('');
-    setRating(5);
+    setError('');
+    try {
+      const response = await api.post('/reviews/', {
+        reviewer_name: name,
+        rating,
+        comment,
+      });
+      setReviews([response.data, ...reviews]);
+      setName('');
+      setComment('');
+      setRating(5);
+    } catch (error: any) {
+      console.error('Failed to submit review', error);
+      const errorMsg = error.response?.data 
+        ? Object.values(error.response.data).flat().join(' ') 
+        : 'Failed to submit review. Please check your input.';
+      setError(errorMsg);
+    }
   };
 
   return (
@@ -72,6 +76,7 @@ export default function AppReviewsPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md border border-red-200">{error}</div>}
                 <div className="space-y-2">
                   <Label htmlFor="name">Name</Label>
                   <Input 
@@ -131,9 +136,9 @@ export default function AppReviewsPage() {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <div className="font-semibold text-lg">{review.name}</div>
+                      <div className="font-semibold text-lg">{review.reviewer_name}</div>
                       <div className="text-sm text-muted-foreground">
-                        {new Date(review.date).toLocaleDateString()}
+                        {new Date(review.created_at).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="flex">

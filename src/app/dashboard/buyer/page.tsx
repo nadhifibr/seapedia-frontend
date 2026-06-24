@@ -21,8 +21,9 @@ export default function BuyerDashboard() {
 
   // Addresses State
   const [addresses, setAddresses] = useState<any[]>([]);
-  const [addressForm, setAddressForm] = useState({ label: '', full_address: '', is_default: false });
+  const [addressForm, setAddressForm] = useState({ label: '', full_address: '', phone_number: '', is_default: false });
   const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [addressError, setAddressError] = useState('');
 
   // Report State
   const [report, setReport] = useState<{total_spent: number, total_orders: number}>({ total_spent: 0, total_orders: 0 });
@@ -84,14 +85,19 @@ export default function BuyerDashboard() {
 
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAddressError('');
     setIsAddingAddress(true);
     try {
       await api.post('/addresses/', addressForm);
       await fetchAddresses();
-      setAddressForm({ label: '', full_address: '', is_default: false });
-    } catch (err) {
+      setAddressForm({ label: '', full_address: '', phone_number: '', is_default: false });
+      setIsAddingAddress(false);
+    } catch (err: any) {
       console.error('Failed to add address', err);
-      alert('Failed to add address');
+      const errorMsg = err.response?.data 
+        ? Object.values(err.response.data).flat().join(' ') 
+        : 'Failed to add address';
+      setAddressError(errorMsg);
     } finally {
       setIsAddingAddress(false);
     }
@@ -238,6 +244,7 @@ export default function BuyerDashboard() {
                         )}
                         <h4 className="font-bold text-slate-800 pr-20">{addr.label}</h4>
                         <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{addr.full_address}</p>
+                        <p className="text-sm text-slate-500 mt-1">{addr.phone_number}</p>
                         
                         <div className="mt-4 flex items-center gap-2">
                           {!addr.is_default && (
@@ -252,12 +259,14 @@ export default function BuyerDashboard() {
                       </div>
                     ))
                   )}
+                  <Button variant="secondary" className="w-full" onClick={() => { setIsAddingAddress(true); setAddressError(''); }}>Add New Address</Button>
                 </div>
 
                 {/* Add Address Form */}
                 <div className="pt-4 border-t">
                   <h4 className="font-semibold mb-4 text-xs uppercase text-slate-500 tracking-wider">Add New Address</h4>
                   <form onSubmit={handleAddAddress} className="space-y-4">
+                    {addressError && <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md border border-red-200">{addressError}</div>}
                     <div className="space-y-1.5">
                       <Label className="text-sm font-medium">Address Label</Label>
                       <Input 
@@ -275,6 +284,15 @@ export default function BuyerDashboard() {
                         onChange={e => setAddressForm({...addressForm, full_address: e.target.value})} 
                         required 
                         placeholder="123 Ocean Drive, Atlantis City, Deep Sea 99999"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium">Phone Number</Label>
+                      <Input 
+                        value={addressForm.phone_number} 
+                        onChange={e => setAddressForm({...addressForm, phone_number: e.target.value})} 
+                        required 
+                        placeholder="+628123456789"
                       />
                     </div>
                     <div className="flex items-center gap-2 pt-2">
