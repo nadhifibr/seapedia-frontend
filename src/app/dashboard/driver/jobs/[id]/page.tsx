@@ -63,7 +63,7 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
   if (!job) return null;
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['DRIVER']}>
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Button variant="ghost" onClick={() => router.push('/dashboard/driver')} className="mb-6 -ml-4">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard

@@ -28,7 +28,7 @@ export function ProtectedRoute({ children, allowedRoles }: { children: React.Rea
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
-    const hasRole = user?.roles?.some(role => allowedRoles.includes(role));
+    const hasRole = user?.active_role && allowedRoles.includes(user.active_role);
     if (!hasRole) {
       return (
         <div className="flex h-screen items-center justify-center flex-col">

@@ -123,7 +123,7 @@ export default function BuyerDashboard() {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['BUYER']}>
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Buyer Dashboard</h1>

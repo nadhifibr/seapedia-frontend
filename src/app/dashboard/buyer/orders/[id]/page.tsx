@@ -53,7 +53,7 @@ export default function BuyerOrderDetailPage({ params }: { params: Promise<{ id:
   if (!order) return null;
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['BUYER']}>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <Button variant="ghost" onClick={() => router.push('/dashboard/buyer/orders')} className="mb-6 -ml-4 text-slate-500 hover:text-slate-800">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to My Orders

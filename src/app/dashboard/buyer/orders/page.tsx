@@ -54,7 +54,7 @@ export default function BuyerOrdersPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['BUYER']}>
       <div className="max-w-5xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold flex items-center gap-3 text-slate-800 mb-8">
           <ShoppingBag className="w-8 h-8 text-primary" /> 

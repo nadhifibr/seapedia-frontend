@@ -40,8 +40,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     get().fetchProfile();
   },
 
-  logout: () => {
+  logout: async () => {
     if (typeof window !== 'undefined') {
+      const refreshToken = localStorage.getItem('refresh_token');
+      if (refreshToken) {
+        try {
+          await api.post('/auth/logout/', { refresh_token: refreshToken });
+        } catch (error) {
+          console.error('Failed to logout on server', error);
+        }
+      }
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
     }

@@ -68,7 +68,7 @@ export default function CartPage() {
   const isEmpty = !cart || !cart.items || cart.items.length === 0;
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['BUYER']}>
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-3 text-slate-800">
