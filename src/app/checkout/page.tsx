@@ -168,10 +168,15 @@ export default function CheckoutPage() {
               </CardHeader>
               <CardContent className="p-4 space-y-3">
                 {[
-                  { id: 'INSTANT', label: 'Instant', price: 50000, desc: 'Delivery within 2-3 hours' },
-                  { id: 'NEXT_DAY', label: 'Next Day', price: 20000, desc: 'Delivery by tomorrow' },
-                  { id: 'REGULAR', label: 'Regular', price: 10000, desc: 'Delivery in 2-4 days' },
-                ].map((method) => (
+                  { id: 'INSTANT', label: 'Instant', basePrice: 50000, desc: 'Delivery within 2-3 hours' },
+                  { id: 'NEXT_DAY', label: 'Next Day', basePrice: 20000, desc: 'Delivery by tomorrow' },
+                  { id: 'REGULAR', label: 'Regular', basePrice: 10000, desc: 'Delivery in 2-4 days' },
+                ].map((method) => {
+                  const displayPrice = summary?.available_delivery_fees?.[method.id] 
+                    ? Number(summary.available_delivery_fees[method.id]) 
+                    : method.basePrice;
+                    
+                  return (
                   <label key={method.id} className={`flex items-start justify-between p-3 border rounded-lg cursor-pointer transition-colors ${deliveryMethod === method.id ? 'border-primary bg-primary/5' : 'hover:bg-slate-50'}`}>
                     <div className="flex items-start gap-3">
                       <input 
@@ -188,10 +193,11 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <div className="font-semibold text-primary">
-                      Rp {method.price.toLocaleString('id-ID')}
+                      {summary ? `Rp ${displayPrice.toLocaleString('id-ID')}` : 'Calculating...'}
                     </div>
                   </label>
-                ))}
+                  );
+                })}
               </CardContent>
             </Card>
 

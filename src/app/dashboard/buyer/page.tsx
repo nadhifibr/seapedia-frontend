@@ -21,7 +21,7 @@ export default function BuyerDashboard() {
 
   // Addresses State
   const [addresses, setAddresses] = useState<any[]>([]);
-  const [addressForm, setAddressForm] = useState({ label: '', full_address: '', phone_number: '', is_default: false });
+  const [addressForm, setAddressForm] = useState({ label: '', full_address: '', phone_number: '', location: '', is_default: false });
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [addressError, setAddressError] = useState('');
 
@@ -90,7 +90,7 @@ export default function BuyerDashboard() {
     try {
       await api.post('/addresses/', addressForm);
       await fetchAddresses();
-      setAddressForm({ label: '', full_address: '', phone_number: '', is_default: false });
+      setAddressForm({ label: '', full_address: '', phone_number: '', location: '', is_default: false });
       setIsAddingAddress(false);
     } catch (err: any) {
       console.error('Failed to add address', err);
@@ -242,7 +242,15 @@ export default function BuyerDashboard() {
                             <CheckCircle2 className="w-3 h-3 mr-1" /> Default
                           </div>
                         )}
-                        <h4 className="font-bold text-slate-800 pr-20">{addr.label}</h4>
+                        <div className="flex items-center justify-between pr-20">
+                          <h4 className="font-bold text-slate-800">{addr.label}</h4>
+                          {addr.location && (
+                            <div className="flex items-center text-xs font-medium text-slate-500">
+                              <MapPin className="w-3 h-3 mr-1 text-primary" />
+                              {addr.location.replace('_', ' ')}
+                            </div>
+                          )}
+                        </div>
                         <p className="text-sm text-slate-600 mt-1 whitespace-pre-wrap">{addr.full_address}</p>
                         <p className="text-sm text-slate-500 mt-1">{addr.phone_number}</p>
                         
@@ -285,6 +293,27 @@ export default function BuyerDashboard() {
                         required 
                         placeholder="123 Ocean Drive, Atlantis City, Deep Sea 99999"
                       />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium">City Location</Label>
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={addressForm.location}
+                        onChange={e => setAddressForm({...addressForm, location: e.target.value})}
+                        required
+                      >
+                        <option value="">Select a City</option>
+                        <option value="JAKARTA">Jakarta</option>
+                        <option value="TANGERANG">Tangerang</option>
+                        <option value="ANYER">Anyer</option>
+                        <option value="BALI">Bali</option>
+                        <option value="LOMBOK">Lombok</option>
+                        <option value="BATAM">Batam</option>
+                        <option value="MANADO">Manado</option>
+                        <option value="MAKASSAR">Makassar</option>
+                        <option value="SURABAYA">Surabaya</option>
+                        <option value="RAJA_AMPAT">Raja Ampat</option>
+                      </select>
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-sm font-medium">Phone Number</Label>
