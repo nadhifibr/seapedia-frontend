@@ -110,27 +110,40 @@ export default function ProductDetailPage() {
 
           <div className="mt-auto space-y-6">
             {/* Store Card */}
-            <Card className="bg-slate-50 border-none shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <StoreIcon className="w-5 h-5 text-primary" />
-                  Sold by: {product.store?.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-4">
-                  {product.store?.image_url && (
-                    <img src={product.store.image_url} alt={product.store.name} className="w-16 h-16 rounded object-cover shadow-sm" />
-                  )}
-                  <div>
-                    <p className="text-sm text-slate-600 line-clamp-2">{product.store?.description || 'No description available for this store.'}</p>
-                    <div className="flex items-center gap-1 text-xs text-green-600 font-medium mt-2">
-                      <ShieldCheck className="w-4 h-4" /> SEAPEDIA Verified Seller
+            {product.store ? (
+              <Link href={`/store/${product.store.slug}`} className="block">
+                <Card className="bg-slate-50 border-none shadow-sm hover:bg-slate-100 transition-colors">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
+                      <StoreIcon className="w-5 h-5 text-primary" />
+                      Sold by: {product.store.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-4">
+                      {product.store.image_url && (
+                        <img src={product.store.image_url} alt={product.store.name} className="w-16 h-16 rounded object-cover shadow-sm" />
+                      )}
+                      <div>
+                        <p className="text-sm text-slate-600 line-clamp-2">{product.store.description || 'No description available for this store.'}</p>
+                        <div className="flex items-center gap-1 text-xs text-green-600 font-medium mt-2">
+                          <ShieldCheck className="w-4 h-4" /> SEAPEDIA Verified Seller
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </Link>
+            ) : (
+              <Card className="bg-slate-50 border-none shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <StoreIcon className="w-5 h-5 text-primary" />
+                    Sold by: Unknown Store
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            )}
 
             {/* Actions */}
             <div className="pt-6 border-t flex flex-col sm:flex-row gap-4">
