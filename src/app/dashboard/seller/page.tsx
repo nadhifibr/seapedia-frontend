@@ -17,7 +17,7 @@ export default function SellerDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Store form state
-  const [storeForm, setStoreForm] = useState({ name: '', description: '', image_url: '' });
+  const [storeForm, setStoreForm] = useState({ name: '', description: '', image_url: '', location: '' });
   const [isStoreSubmitting, setIsStoreSubmitting] = useState(false);
   const [storeError, setStoreError] = useState('');
 
@@ -48,7 +48,7 @@ export default function SellerDashboard() {
     try {
       const res = await api.get('/stores/my-store/');
       setStore(res.data);
-      setStoreForm({ name: res.data.name, description: res.data.description, image_url: res.data.image_url || '' });
+      setStoreForm({ name: res.data.name, description: res.data.description, image_url: res.data.image_url || '', location: res.data.location || '' });
       fetchProducts();
     } catch (err: any) {
       if (err.response?.status !== 404) {
@@ -197,6 +197,27 @@ export default function SellerDashboard() {
                       value={storeForm.description} 
                       onChange={e => setStoreForm({...storeForm, description: e.target.value})} 
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="storeLocation">Store Location (Optional)</Label>
+                    <select 
+                      id="storeLocation"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={storeForm.location}
+                      onChange={e => setStoreForm({...storeForm, location: e.target.value})}
+                    >
+                      <option value="">Select a Location</option>
+                      <option value="JAKARTA">Jakarta</option>
+                      <option value="TANGERANG">Tangerang</option>
+                      <option value="ANYER">Anyer</option>
+                      <option value="BALI">Bali</option>
+                      <option value="LOMBOK">Lombok</option>
+                      <option value="BATAM">Batam</option>
+                      <option value="MANADO">Manado</option>
+                      <option value="MAKASSAR">Makassar</option>
+                      <option value="SURABAYA">Surabaya</option>
+                      <option value="RAJA_AMPAT">Raja Ampat</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="storeImg">Store Logo URL</Label>

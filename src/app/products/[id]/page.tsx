@@ -7,6 +7,7 @@ import { Fish, ArrowLeft, Store as StoreIcon, ShieldCheck, Star } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Plus, Minus } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -19,6 +20,7 @@ export default function ProductDetailPage() {
   const [stats, setStats] = useState({ average_rating: 0, total_reviews: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   
   // Review Form State
   const [rating, setRating] = useState<number>(5);
@@ -58,15 +60,15 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     setIsAddingToCart(true);
     try {
-      await api.post('/cart/items/', { product_id: product.id, quantity: 1 });
-      alert('Product added to cart!');
+      await api.post('/cart/items/', { product_id: product.id, quantity: quantity });
+      alert(`Added ${quantity} item(s) to cart!`);
     } catch (err: any) {
       if (err.response?.data?.error_code === 'STORE_CONFLICT') {
         const confirmClear = confirm(`Your cart already contains items from a different store. Do you want to clear your cart and add this product from ${product.store.name} instead?`);
         if (confirmClear) {
           try {
             await api.delete('/cart/');
-            await api.post('/cart/items/', { product_id: product.id, quantity: 1 });
+            await api.post('/cart/items/', { product_id: product.id, quantity: quantity });
             alert('Cart cleared and product added successfully!');
           } catch (retryErr) {
             alert('Failed to add product after clearing cart.');
@@ -190,20 +192,47 @@ export default function ProductDetailPage() {
             )}
 
             {/* Actions */}
-            <div className="pt-6 border-t flex flex-col sm:flex-row gap-4">
-              <Button 
-                size="lg" 
-                className="flex-1" 
-                disabled={product.stock === 0 || !user || !user.roles.includes('BUYER') || isAddingToCart}
-                onClick={handleAddToCart}
-              >
-                {isAddingToCart ? 'Adding...' : (product.stock === 0 ? 'Out of Stock' : 'Add to Cart')}
-              </Button>
-              {!user && (
-                <div className="text-center sm:text-left text-sm text-slate-500 self-center">
-                  <Link href="/auth/login" className="text-primary hover:underline">Log in</Link> as a buyer to purchase.
+            <div className="pt-6 border-t flex flex-col gap-4">
+              {product.stock > 0 && user && user.roles.includes('BUYER') && (
+                <div className="flex items-center gap-4 mb-2">
+                  <span className="text-sm font-medium text-slate-700">Quantity:</span>
+                  <div className="flex items-center border rounded-md">
+                    <button 
+                      className="px-3 py-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50 transition-colors"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1 || isAddingToCart}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="w-12 text-center font-medium text-slate-900 border-x py-1.5">
+                      {quantity}
+                    </div>
+                    <button 
+                      className="px-3 py-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50 transition-colors"
+                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                      disabled={quantity >= product.stock || isAddingToCart}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  size="lg" 
+                  className="flex-1" 
+                  disabled={product.stock === 0 || !user || !user.roles.includes('BUYER') || isAddingToCart}
+                  onClick={handleAddToCart}
+                >
+                  {isAddingToCart ? 'Adding...' : (product.stock === 0 ? 'Out of Stock' : `Add to Cart - $${(Number(product.price) * quantity).toFixed(2)}`)}
+                </Button>
+                {!user && (
+                  <div className="text-center sm:text-left text-sm text-slate-500 self-center">
+                    <Link href="/auth/login" className="text-primary hover:underline">Log in</Link> as a buyer to purchase.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

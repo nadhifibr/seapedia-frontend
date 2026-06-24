@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, SlidersHorizontal, Fish, StoreIcon, ShieldCheck } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, Fish, StoreIcon, ShieldCheck, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import api from '@/lib/api';
@@ -17,6 +17,7 @@ export default function ProductsPage() {
   const [searchType, setSearchType] = useState<'PRODUCTS' | 'STORES'>('PRODUCTS');
   const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState('ALL');
+  const [location, setLocation] = useState('ALL');
   const [sort, setSort] = useState('newest');
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function ProductsPage() {
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, category, sort, searchType]);
+  }, [searchQuery, category, location, sort, searchType]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -36,6 +37,7 @@ export default function ProductsPage() {
           params: {
             q: searchQuery,
             category: category,
+            location: location,
             sort: sort,
           }
         });
@@ -44,6 +46,7 @@ export default function ProductsPage() {
         const res = await api.get('/stores/', {
           params: {
             q: searchQuery,
+            location: location,
           }
         });
         setItems(res.data);
@@ -95,10 +98,37 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* Filters (Only for Products) */}
-        {searchType === 'PRODUCTS' && (
-          <div className="flex gap-4 border-t pt-4 mt-2">
-            {/* Category Filter */}
+        {/* Global Filters (Applies to both) */}
+        <div className="flex gap-4 border-t pt-4 mt-2">
+          {/* Location Filter */}
+          <div className="w-40">
+            <Select value={location} onValueChange={(val) => setLocation(val || 'ALL')}>
+              <SelectTrigger className="bg-white">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-slate-500" />
+                  <SelectValue placeholder="Location" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Locations</SelectItem>
+                <SelectItem value="JAKARTA">Jakarta</SelectItem>
+                <SelectItem value="TANGERANG">Tangerang</SelectItem>
+                <SelectItem value="ANYER">Anyer</SelectItem>
+                <SelectItem value="BALI">Bali</SelectItem>
+                <SelectItem value="LOMBOK">Lombok</SelectItem>
+                <SelectItem value="BATAM">Batam</SelectItem>
+                <SelectItem value="MANADO">Manado</SelectItem>
+                <SelectItem value="MAKASSAR">Makassar</SelectItem>
+                <SelectItem value="SURABAYA">Surabaya</SelectItem>
+                <SelectItem value="RAJA_AMPAT">Raja Ampat</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filters (Only for Products) */}
+          {searchType === 'PRODUCTS' && (
+            <>
+              {/* Category Filter */}
           <div className="w-40">
             <Select value={category} onValueChange={(val) => setCategory(val || 'ALL')}>
               <SelectTrigger className="bg-white">
@@ -135,8 +165,9 @@ export default function ProductsPage() {
               </SelectContent>
             </Select>
           </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       {isLoading ? (
@@ -167,13 +198,21 @@ export default function ProductsPage() {
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between mb-1">
                     {item.store ? (
-                      <Link href={`/store/${item.store.slug}`} className="text-xs font-medium text-primary line-clamp-1 hover:underline">
-                        {item.store.name}
-                      </Link>
+                      <div className="flex flex-col">
+                        <Link href={`/store/${item.store.slug}`} className="text-xs font-medium text-primary line-clamp-1 hover:underline">
+                          {item.store.name}
+                        </Link>
+                        {item.store.location && (
+                          <div className="flex items-center text-[10px] text-slate-500 mt-0.5">
+                            <MapPin className="w-3 h-3 mr-0.5" />
+                            {item.store.location.replace('_', ' ')}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <div className="text-xs font-medium text-primary line-clamp-1">Unknown Store</div>
                     )}
-                    <div className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-full text-slate-500 uppercase tracking-wide">
+                    <div className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-full text-slate-500 uppercase tracking-wide self-start">
                       {item.category?.replace('_', ' ')}
                     </div>
                   </div>
@@ -204,6 +243,12 @@ export default function ProductsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="mt-auto">
+                  {item.location && (
+                    <div className="flex items-center text-xs text-slate-500 mb-2 font-medium">
+                      <MapPin className="w-3.5 h-3.5 mr-1 text-primary" />
+                      {item.location.replace('_', ' ')}
+                    </div>
+                  )}
                   <p className="text-sm text-slate-600 line-clamp-3">
                     {item.description || 'No description available for this store.'}
                   </p>

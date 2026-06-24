@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Fish, Store as StoreIcon, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Fish, Store as StoreIcon, ShieldCheck, ArrowLeft, MapPin } from 'lucide-react';
 import api from '@/lib/api';
 
 export default function StoreProfilePage() {
@@ -85,6 +85,12 @@ export default function StoreProfilePage() {
                   <ShieldCheck className="w-6 h-6 text-green-500" />
                 </span>
               </h1>
+              {store.location && (
+                <div className="flex items-center text-sm font-medium text-slate-500 mt-1">
+                  <MapPin className="w-4 h-4 mr-1 text-primary" />
+                  {store.location.replace('_', ' ')}
+                </div>
+              )}
               <p className="text-slate-600 mt-2 max-w-3xl">
                 {store.description || 'Welcome to our store! Browse our high-quality products below.'}
               </p>
