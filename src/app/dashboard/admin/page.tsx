@@ -181,13 +181,15 @@ export default function AdminDashboardPage() {
     { id: 'discounts', label: 'Vouchers/Promos', endpoint: 'discounts', columns: [
       { header: 'Code', accessor: 'code', render: (val: string) => <span className="font-mono font-medium">{val}</span> },
       { header: 'Type', accessor: 'type' },
-      { header: 'Store', accessor: 'store_name' },
       { header: 'Value', accessor: 'value', render: (val: string, row: any) => `${val} ${row.value_type === 'PERCENT' ? '%' : 'Rp'}` },
-      { header: 'Status', accessor: 'is_active', render: (val: boolean) => (
-        <span className={`px-2 py-1 text-xs rounded-full ${val ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-          {val ? 'Active' : 'Inactive'}
-        </span>
-      )}
+      { header: 'Status', accessor: 'is_active', render: (val: boolean, row: any) => {
+        const isActive = val && new Date(row.expires_at) > new Date();
+        return (
+          <span className={`px-2 py-1 text-xs rounded-full ${isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+            {isActive ? 'Active' : 'Inactive'}
+          </span>
+        );
+      }}
     ]},
     { id: 'deliveries', label: 'Delivery Jobs', endpoint: 'deliveries', columns: [
       { header: 'Order ID', accessor: 'order_id', render: (val: string) => <span className="text-xs text-slate-500">{val ? val.substring(0, 8) + '...' : '-'}</span> },
@@ -212,12 +214,21 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-          <Activity className="h-8 w-8 text-primary" />
-          Admin Monitoring Dashboard
-        </h1>
-        <p className="text-slate-500 mt-2">Marketplace Overview & Statistics</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
+            <Activity className="h-8 w-8 text-primary" />
+            Admin Monitoring Dashboard
+          </h1>
+          <p className="text-slate-500 mt-2">Marketplace Overview & Statistics</p>
+        </div>
+        <a 
+          href="/dashboard/admin/discounts"
+          className="bg-primary text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
+        >
+          <Ticket className="h-4 w-4" />
+          Manage Discounts
+        </a>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-10">
