@@ -9,10 +9,20 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export function Navbar() {
-  const { isAuthenticated, user, logout, fetchProfile, switchRole } = useAuthStore();
+  const { isAuthenticated, user, logout, fetchProfile, switchRole, addRole } = useAuthStore();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [selectedUpgradeRole, setSelectedUpgradeRole] = useState('');
+  const [isUpgrading, setIsUpgrading] = useState(false);
+
+  const availableRoles = [];
+  if (user?.roles && !user.roles.includes('ADMIN')) {
+    if (!user.roles.includes('SELLER')) availableRoles.push('SELLER');
+    if (!user.roles.includes('DRIVER')) availableRoles.push('DRIVER');
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -39,6 +49,7 @@ export function Navbar() {
   };
 
   return (
+    <>
     <nav className="bg-[#0B3D91] sticky top-0 z-50 shadow-sm py-3">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-6">
 
@@ -121,6 +132,28 @@ export function Navbar() {
 
                     {user?.roles && user.roles.length > 1 && <div className="h-px bg-slate-100 my-1"></div>}
 
+                    {availableRoles.length > 0 && (
+                      <>
+                        {availableRoles.includes('SELLER') && (
+                          <button
+                            onClick={() => { setSelectedUpgradeRole('SELLER'); setIsUpgradeModalOpen(true); }}
+                            className="w-full text-left px-4 py-2.5 text-sm text-[#0B3D91] hover:bg-blue-50/50 font-medium transition-colors cursor-pointer"
+                          >
+                            Buka Toko Gratis
+                          </button>
+                        )}
+                        {availableRoles.includes('DRIVER') && (
+                          <button
+                            onClick={() => { setSelectedUpgradeRole('DRIVER'); setIsUpgradeModalOpen(true); }}
+                            className="w-full text-left px-4 py-2.5 text-sm text-[#0B3D91] hover:bg-blue-50/50 font-medium transition-colors cursor-pointer"
+                          >
+                            Daftar Jadi Driver
+                          </button>
+                        )}
+                        <div className="h-px bg-slate-100 my-1"></div>
+                      </>
+                    )}
+
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center transition-colors"
@@ -149,5 +182,50 @@ export function Navbar() {
         </div>
       </div>
     </nav>
+      {isUpgradeModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => !isUpgrading && setIsUpgradeModalOpen(false)}></div>
+          <div className="relative bg-white shadow-2xl rounded-2xl w-full max-w-sm p-6 overflow-hidden transform transition-all">
+            <div className="relative z-10">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">
+                {selectedUpgradeRole === 'SELLER' ? 'Buka Toko Sekarang?' : 'Jadi Driver Sekarang?'}
+              </h3>
+              <p className="text-slate-600 text-sm mb-6 leading-relaxed">
+                {selectedUpgradeRole === 'SELLER' 
+                  ? 'Tingkatkan akunmu untuk mulai berjualan dan jangkau lebih banyak pelanggan di Seapedia. Gratis!' 
+                  : 'Bergabunglah menjadi mitra pengemudi kami dan dapatkan penghasilan tambahan setiap harinya.'}
+              </p>
+              
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setIsUpgradeModalOpen(false)}
+                  disabled={isUpgrading}
+                  className="flex-1 bg-[#F8FAFC] text-[#0F172A] border-2 border-[#0F172A] hover:bg-slate-200 font-normal cursor-pointer"
+                >
+                  Batal
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    setIsUpgrading(true);
+                    try {
+                      await addRole(selectedUpgradeRole);
+                      setIsUpgradeModalOpen(false);
+                    } catch (e) {
+                      console.error(e);
+                    } finally {
+                      setIsUpgrading(false);
+                    }
+                  }}
+                  disabled={isUpgrading}
+                  className="flex-1 bg-[#0F172A] text-white hover:bg-[#0F172A]/90 font-normal border-none cursor-pointer"
+                >
+                  {isUpgrading ? 'Memproses...' : 'Lanjutkan'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -208,7 +208,7 @@ export default function LandingPage() {
                           {/* Hover: Location */}
                           <div className="absolute inset-0 flex items-center transition-transform duration-300 translate-y-full group-hover/card:translate-y-0 text-slate-600">
                             <MapPin className="w-3 h-3 mr-1" />
-                            <span className="line-clamp-1">{item.store.location ? item.store.location.replace('_', ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) : 'Unknown'}</span>
+                            <span className="line-clamp-1">{item.store.location ? item.store.location.replace('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Unknown'}</span>
                           </div>
                         </div>
                       )}

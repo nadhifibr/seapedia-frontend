@@ -22,6 +22,7 @@ interface AuthState {
   logout: () => void;
   fetchProfile: () => Promise<void>;
   switchRole: (role: string) => Promise<void>;
+  addRole: (role: string) => Promise<void>;
   setLoading: (status: boolean) => void;
 }
 
@@ -73,6 +74,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('Failed to switch role', error);
       set({ loading: false });
+    }
+  },
+
+  addRole: async (role: string) => {
+    try {
+      set({ loading: true });
+      const response = await api.post('/auth/add-role/', { role });
+      const { access, refresh } = response.data;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('access_token', access);
+        localStorage.setItem('refresh_token', refresh);
+      }
+      await get().fetchProfile();
+      if (typeof window !== 'undefined') {
+        window.location.href = `/dashboard/${role.toLowerCase()}`;
+      }
+    } catch (error) {
+      console.error('Failed to add role', error);
+      set({ loading: false });
+      throw error; // Rethrow so components can catch and show errors
     }
   },
 
