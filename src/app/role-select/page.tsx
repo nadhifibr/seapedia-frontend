@@ -15,10 +15,10 @@ export default function RoleSelectPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  // If user only has one role and it's already active, redirect them
+  // If user only has one role and it's already active, redirect them to landing page
   useEffect(() => {
     if (user?.active_role && user.roles.length === 1) {
-      router.push(`/dashboard/${user.active_role.toLowerCase()}`);
+      router.push('/');
     }
   }, [user, router]);
 
@@ -32,8 +32,8 @@ export default function RoleSelectPage() {
       localStorage.setItem('refresh_token', response.data.refresh);
       // refetch profile to get new active_role
       await fetchProfile();
-      // route to dashboard
-      router.push(`/dashboard/${role.toLowerCase()}`);
+      // route to landing page
+      router.push('/');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to select role.');
       setLoading(false);

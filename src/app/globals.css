@@ -46,6 +46,13 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Seapedia Custom Global Colors */
+  --color-seapedia-navy: #0B3D91;
+  --color-seapedia-navy-hover: #082b66;
+  --color-seapedia-slate-dark: #0F172A;
+  --color-seapedia-slate-light: #F8FAFC;
+  --color-seapedia-muted: #ABB3C6;
 }
 
 :root {
