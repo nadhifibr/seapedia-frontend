@@ -2,32 +2,32 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, SlidersHorizontal, Fish, StoreIcon, ShieldCheck, MapPin } from 'lucide-react';
+import { Filter, SlidersHorizontal, Fish, StoreIcon, ShieldCheck, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import api from '@/lib/api';
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
+  const queryParam = searchParams.get('search') || '';
+
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Search, Filter, Sort States
+  // Filter, Sort States
   const [searchType, setSearchType] = useState<'PRODUCTS' | 'STORES'>('PRODUCTS');
-  const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState('ALL');
   const [location, setLocation] = useState('ALL');
   const [sort, setSort] = useState('newest');
 
   useEffect(() => {
-    // Debounce search input slightly so it doesn't fetch on every keystroke
-    const delayDebounceFn = setTimeout(() => {
-      fetchData();
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, category, location, sort, searchType]);
+    // Debounce is less necessary now since search is triggered by navigation, 
+    // but we can keep a small delay or just fetch immediately
+    fetchData();
+  }, [queryParam, category, location, sort, searchType]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -35,7 +35,7 @@ export default function ProductsPage() {
       if (searchType === 'PRODUCTS') {
         const res = await api.get('/products/', {
           params: {
-            q: searchQuery,
+            q: queryParam,
             category: category,
             location: location,
             sort: sort,
@@ -45,7 +45,7 @@ export default function ProductsPage() {
       } else {
         const res = await api.get('/stores/', {
           params: {
-            q: searchQuery,
+            q: queryParam,
             location: location,
           }
         });
@@ -68,21 +68,10 @@ export default function ProductsPage() {
 
       {/* Control Bar: Search, Filter, Sort */}
       <div className="flex flex-col gap-4 mb-8 bg-slate-50 p-4 rounded-lg border">
-        {/* Search */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input 
-              type="text" 
-              placeholder={`Search ${searchType === 'PRODUCTS' ? 'products' : 'stores'}...`} 
-              className="pl-9 bg-white"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {/* Toggle Type */}
-          <div className="flex bg-slate-200/50 p-1 rounded-md">
+        {/* Toggle Type */}
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-slate-500">I am looking for:</span>
+          <div className="flex bg-slate-200/50 p-1 rounded-md w-fit">
             <button
               className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${searchType === 'PRODUCTS' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
               onClick={() => setSearchType('PRODUCTS')}
