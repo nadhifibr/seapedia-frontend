@@ -315,7 +315,7 @@ export default function ProductsPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 flex-1 content-start">
+              <div className={`grid gap-3 md:gap-4 flex-1 content-start ${searchType === 'PRODUCTS' ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1 md:grid-cols-2'}`}>
                 {items.map((item) => (
                   searchType === 'PRODUCTS' ? (
                     <Link href={`/products/${item.id}`} key={item.id} className="block group/card h-full">
@@ -375,36 +375,67 @@ export default function ProductsPage() {
                       </Card>
                     </Link>
                   ) : (
-                    <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg">
-                      <div className="h-40 bg-slate-100 flex items-center justify-center text-slate-300">
-                        {item.image_url ? (
-                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <StoreIcon className="w-16 h-16" />
-                        )}
-                      </div>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2 line-clamp-1">
-                          {item.name}
-                          <ShieldCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="mt-auto">
-                        {item.location && (
-                          <div className="flex items-center text-xs text-slate-500 mb-2 font-medium">
-                            <MapPin className="w-3.5 h-3.5 mr-1 text-primary" />
-                            {item.location.replace('_', ' ')}
+                    <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg p-4 bg-white border border-slate-200 rounded-[10px]">
+                      {/* Header Section */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden flex-shrink-0 border border-slate-200">
+                            {item.image_url ? (
+                              <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <StoreIcon className="w-6 h-6" />
+                            )}
                           </div>
-                        )}
-                        <p className="text-sm text-slate-600 line-clamp-2">
-                          {item.description || 'No description available.'}
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <Link href={`/store/${item.slug}`} className="w-full">
-                          <Button variant="outline" className="w-full text-primary border-primary hover:bg-primary/5">Kunjungi Toko</Button>
+                          <div>
+                            <h3 className="font-bold text-slate-900 flex items-center gap-1.5 line-clamp-1">
+                              {item.name}
+                              <ShieldCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
+                            </h3>
+                            {item.location && (
+                              <div className="text-sm text-slate-500 line-clamp-1">
+                                {item.location.replace('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <Link href={`/store/${item.slug}`}>
+                          <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary/5 rounded-full px-4 font-semibold shrink-0">
+                            Lihat Toko
+                          </Button>
                         </Link>
-                      </CardFooter>
+                      </div>
+
+                      {/* Products Grid */}
+                      <div className="grid grid-cols-3 gap-2 mt-auto">
+                        {[0, 1, 2].map((index) => {
+                          const product = item.recent_products?.[index];
+                          if (product) {
+                            return (
+                              <Link href={`/products/${product.id}`} key={product.id} className="flex flex-col gap-1.5 group">
+                                <div className="aspect-square rounded-md overflow-hidden bg-slate-100 relative">
+                                  {product.image_url ? (
+                                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                  ) : (
+                                    <Fish className="w-6 h-6 text-slate-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                  )}
+                                </div>
+                                <div className="text-[13px] font-bold text-amber-500 line-clamp-1">
+                                  Rp {Number(product.price).toLocaleString('id-ID')}
+                                </div>
+                              </Link>
+                            );
+                          } else {
+                            return (
+                              <div key={`empty-${index}`} className="flex flex-col gap-1.5">
+                                <div className="aspect-square rounded-md bg-slate-50 flex items-center justify-center border border-dashed border-slate-200">
+                                  <Fish className="w-6 h-6 text-slate-200" />
+                                </div>
+                                <div className="h-4"></div>
+                              </div>
+                            );
+                          }
+                        })}
+                      </div>
                     </Card>
                   )
                 ))}
