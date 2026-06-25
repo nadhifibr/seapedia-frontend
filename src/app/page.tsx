@@ -12,37 +12,37 @@ const categories = [
     id: "FISHING_GEAR",
     title: "Fishing Gear",
     description: "Fishing essentials including rods, reels, lures, and accessories.",
-    image: "/categories/fishing_gear 1.png"
+    image: "/categories/fishing_gear.png"
   },
   {
     id: "DIVING_GEAR",
     title: "Diving Gear",
     description: "Equipment for diving and underwater exploration.",
-    image: "/categories/diving_gear 1.png"
+    image: "/categories/diving_gear.png"
   },
   {
     id: "MARINE_EQUIPMENT",
     title: "Marine Equipment",
     description: "Essential tools and equipment for marine activities.",
-    image: "/categories/marine_equipment 1.png"
+    image: "/categories/marine_equipment.png"
   },
   {
     id: "OCEAN_APPAREL",
     title: "Ocean Apparel",
     description: "Ocean-ready clothing built for comfort and protection.",
-    image: "/categories/ocean_apparel 1.png"
+    image: "/categories/ocean_apparel.png"
   },
   {
     id: "OCEAN_ACCESSORIES",
     title: "Ocean Accessories",
     description: "Accessories for ocean lovers and marine lifestyle.",
-    image: "/categories/ocean_accessories 1.png"
+    image: "/categories/ocean_accessories.png"
   },
   {
     id: "OTHER",
     title: "Other",
     description: "Discover more ocean-related products.",
-    image: "/categories/other_marine 1.png"
+    image: "/categories/other_marine.png"
   }
 ];
 
