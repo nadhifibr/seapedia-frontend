@@ -132,7 +132,7 @@ export default function LandingPage() {
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
             {categories.map((cat) => (
-              <Link href={`/products?category=${cat.id}`} key={cat.id} className="block group">
+              <Link href={`/search?category=${cat.id}`} key={cat.id} className="block group">
                 <Card className="aspect-square md:aspect-[4/5] border-none shadow-md hover:shadow-xl transition-all duration-500 overflow-hidden relative">
                   {/* Background Image */}
                   <img 
@@ -233,7 +233,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Link href="/products">
+            <Link href="/search">
               <Button size="lg" className="bg-[#0F172A] text-white hover:bg-[#0F172A]/90 px-10">
                 Load More
               </Button>

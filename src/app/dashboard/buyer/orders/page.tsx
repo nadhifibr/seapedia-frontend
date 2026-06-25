@@ -66,7 +66,7 @@ export default function BuyerOrdersPage() {
             <ShoppingBag className="w-16 h-16 text-slate-300 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-slate-700 mb-2">No orders yet</h2>
             <p className="text-slate-500 mb-6">You haven't placed any orders.</p>
-            <Button onClick={() => router.push('/products')} size="lg">Start Shopping</Button>
+            <Button onClick={() => router.push('/search')} size="lg">Start Shopping</Button>
           </div>
         ) : (
           <div className="space-y-6">

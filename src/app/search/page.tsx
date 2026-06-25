@@ -34,7 +34,7 @@ const CATEGORY_OPTIONS = [
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
-  const queryParam = searchParams.get('search') || '';
+  const queryParam = searchParams.get('q') || '';
 
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);

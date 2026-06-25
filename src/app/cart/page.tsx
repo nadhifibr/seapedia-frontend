@@ -87,7 +87,7 @@ export default function CartPage() {
             <ShoppingCart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-slate-700 mb-2">Your cart is empty</h2>
             <p className="text-slate-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
-            <Button onClick={() => router.push('/products')} size="lg">Start Shopping</Button>
+            <Button onClick={() => router.push('/search')} size="lg">Start Shopping</Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

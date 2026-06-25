@@ -107,14 +107,14 @@ export default function ProductDetailPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-24 text-center">
         <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
-        <Button onClick={() => router.push('/products')} variant="outline">Back to Catalog</Button>
+        <Button onClick={() => router.push('/search')} variant="outline">Back to Catalog</Button>
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <Button variant="ghost" onClick={() => router.push('/products')} className="mb-6 -ml-4 text-muted-foreground">
+      <Button variant="ghost" onClick={() => router.push('/search')} className="mb-6 -ml-4 text-muted-foreground">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Catalog
       </Button>

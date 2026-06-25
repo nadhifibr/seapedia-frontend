@@ -30,8 +30,8 @@ export function Footer() {
             <h4 className="text-sm font-bold text-slate-900 tracking-wider">Jelajahi Seapedia</h4>
             <ul className="flex flex-col gap-3 text-sm text-slate-500">
               <li><Link href="/" className="hover:text-[#0B3D91] transition-colors">Beranda</Link></li>
-              <li><Link href="/products" className="hover:text-[#0B3D91] transition-colors">Semua Produk</Link></li>
-              <li><Link href="/" className="hover:text-[#0B3D91] transition-colors">Kategori Laut</Link></li>
+              <li><Link href="/search" className="hover:text-[#0B3D91] transition-colors">Semua Produk</Link></li>
+              <li><Link href="#" className="hover:text-[#0B3D91] transition-colors">Toko Terpercaya</Link></li>
               <li><Link href="/" className="hover:text-[#0B3D91] transition-colors">Promo & Diskon</Link></li>
             </ul>
           </div>
