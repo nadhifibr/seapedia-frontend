@@ -143,7 +143,7 @@ export default function ProductDetailPage() {
                 <span className="text-slate-400 ml-1">({stats.total_reviews} reviews)</span>
               </div>
             </div>
-            <div className="text-3xl font-bold text-primary mb-4">${Number(product.price).toFixed(2)}</div>
+            <div className="text-3xl font-bold text-primary mb-4">Rp {Number(product.price).toLocaleString('id-ID')}</div>
             
             <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-6 ${product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
               {product.stock > 0 ? `${product.stock} items in stock` : 'Out of Stock'}
@@ -225,7 +225,7 @@ export default function ProductDetailPage() {
                   disabled={product.stock === 0 || !user || !user.roles.includes('BUYER') || isAddingToCart}
                   onClick={handleAddToCart}
                 >
-                  {isAddingToCart ? 'Adding...' : (product.stock === 0 ? 'Out of Stock' : `Add to Cart - $${(Number(product.price) * quantity).toFixed(2)}`)}
+                  {isAddingToCart ? 'Adding...' : (product.stock === 0 ? 'Out of Stock' : `Add to Cart - Rp ${(Number(product.price) * quantity).toLocaleString('id-ID')}`)}
                 </Button>
                 {!user && (
                   <div className="text-center sm:text-left text-sm text-slate-500 self-center">

@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Store, TrendingUp, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Store, TrendingUp, Truck, ChevronLeft, ChevronRight, Fish, MapPin } from 'lucide-react';
+import api from '@/lib/api';
 
 const categories = [
   {
@@ -47,6 +48,7 @@ const categories = [
 
 export default function LandingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   
   const slides = [
     "bg-gradient-to-b from-[#416ACC] to-[#0B3D91]",
@@ -57,9 +59,20 @@ export default function LandingPage() {
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
 
-  // Auto slide
+  // Auto slide and fetch products
   useEffect(() => {
     const timer = setInterval(nextSlide, 5000);
+    
+    const fetchProducts = async () => {
+      try {
+        const res = await api.get('/products/');
+        setFeaturedProducts(res.data.slice(0, 8)); // Top 8 products
+      } catch (err) {
+        console.error("Failed to fetch products", err);
+      }
+    };
+    fetchProducts();
+
     return () => clearInterval(timer);
   }, []);
 
@@ -129,6 +142,76 @@ export default function LandingPage() {
                 </Card>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products Section */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Featured Products</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">
+              Discover our top picks and fresh arrivals from trusted sellers.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((item) => (
+              <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg">
+                <div className="h-48 bg-slate-100 flex items-center justify-center text-slate-300 relative">
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <Fish className="w-16 h-16" />
+                  )}
+                  {item.stock === 0 && (
+                    <div className="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 m-2 rounded text-xs font-bold">
+                      OUT OF STOCK
+                    </div>
+                  )}
+                </div>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between mb-1">
+                    {item.store ? (
+                      <div className="flex flex-col">
+                        <Link href={`/store/${item.store.slug}`} className="text-xs font-medium text-primary line-clamp-1 hover:underline">
+                          {item.store.name}
+                        </Link>
+                        {item.store.location && (
+                          <div className="flex items-center text-[10px] text-slate-500 mt-0.5">
+                            <MapPin className="w-3 h-3 mr-0.5" />
+                            {item.store.location.replace('_', ' ')}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-xs font-medium text-primary line-clamp-1">Unknown Store</div>
+                    )}
+                    <div className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-full text-slate-500 uppercase tracking-wide self-start">
+                      {item.category?.replace('_', ' ')}
+                    </div>
+                  </div>
+                  <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="mt-auto">
+                  <div className="text-xl font-bold">Rp {Number(item.price).toLocaleString('id-ID')}</div>
+                </CardContent>
+                <CardFooter>
+                  <Link href={`/products/${item.id}`} className="w-full">
+                    <Button variant="outline" className="w-full border-[#0F172A] text-[#0F172A] hover:bg-slate-100">View Details</Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link href="/products">
+              <Button size="lg" className="bg-[#0F172A] text-white hover:bg-[#0F172A]/90 px-10">
+                Load More
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

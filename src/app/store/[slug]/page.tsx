@@ -139,7 +139,7 @@ export default function StoreProfilePage() {
                 <CardTitle className="text-lg line-clamp-1">{product.name}</CardTitle>
               </CardHeader>
               <CardContent className="mt-auto">
-                <div className="text-xl font-bold">${Number(product.price).toFixed(2)}</div>
+                <div className="text-xl font-bold">Rp {Number(product.price).toLocaleString('id-ID')}</div>
               </CardContent>
               <CardFooter>
                 <Link href={`/products/${product.id}`} className="w-full">

@@ -111,7 +111,7 @@ export default function CartPage() {
                     
                     <div className="flex-1 text-center sm:text-left">
                       <h3 className="font-bold text-lg text-slate-800 line-clamp-1">{item.product_detail.name}</h3>
-                      <p className="text-primary font-semibold mt-1">${Number(item.product_detail.price).toFixed(2)}</p>
+                      <p className="text-primary font-semibold mt-1">Rp {Number(item.product_detail.price).toLocaleString('id-ID')}</p>
                     </div>
 
                     <div className="flex items-center gap-3 bg-slate-50 p-1 rounded-lg border">
@@ -126,7 +126,7 @@ export default function CartPage() {
 
                     <div className="text-right sm:ml-4 w-24">
                       <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Subtotal</p>
-                      <p className="font-bold text-lg text-slate-800">${Number(item.subtotal).toFixed(2)}</p>
+                      <p className="font-bold text-lg text-slate-800">Rp {Number(item.subtotal).toLocaleString('id-ID')}</p>
                     </div>
 
                     <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-600 hover:bg-red-50 ml-2 shrink-0" onClick={() => removeItem(item.id)}>
@@ -149,7 +149,7 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-xl font-bold border-t pt-4 text-slate-800">
                     <span>Total Price</span>
-                    <span className="text-primary">${Number(cart.total).toFixed(2)}</span>
+                    <span className="text-primary">Rp {Number(cart.total).toLocaleString('id-ID')}</span>
                   </div>
                   <Button className="w-full mt-6" size="lg" onClick={() => router.push('/checkout')}>
                     Proceed to Checkout

@@ -208,7 +208,7 @@ export default function ProductsPage() {
                   <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
                 </CardHeader>
                 <CardContent className="mt-auto">
-                  <div className="text-xl font-bold">${Number(item.price).toFixed(2)}</div>
+                  <div className="text-xl font-bold">Rp {Number(item.price).toLocaleString('id-ID')}</div>
                 </CardContent>
                 <CardFooter>
                   <Link href={`/products/${item.id}`} className="w-full">

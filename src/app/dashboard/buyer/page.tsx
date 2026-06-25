@@ -143,7 +143,7 @@ export default function BuyerDashboard() {
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="text-4xl font-extrabold text-slate-800 mb-6">
-                  ${Number(balance).toFixed(2)}
+                  Rp {Number(balance).toLocaleString('id-ID')}
                 </div>
                 
                 <form onSubmit={handleTopup} className="flex gap-2">
@@ -207,7 +207,7 @@ export default function BuyerDashboard() {
                           </div>
                         </div>
                         <div className={`font-bold ${t.type === 'TOPUP' ? 'text-green-600' : 'text-slate-800'}`}>
-                          {t.type === 'TOPUP' ? '+' : '-'}${Number(t.amount).toFixed(2)}
+                          {t.type === 'TOPUP' ? '+' : '-'}Rp {Number(t.amount).toLocaleString('id-ID')}
                         </div>
                       </div>
                     ))}

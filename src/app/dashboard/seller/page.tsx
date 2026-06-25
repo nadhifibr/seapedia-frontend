@@ -272,7 +272,7 @@ export default function SellerDashboard() {
                                   )}
                                   {p.name}
                                 </td>
-                                <td className="px-4 py-3">${Number(p.price).toFixed(2)}</td>
+                                <td className="px-4 py-3">Rp {Number(p.price).toLocaleString('id-ID')}</td>
                                 <td className="px-4 py-3">
                                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${p.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                     {p.stock} in stock
