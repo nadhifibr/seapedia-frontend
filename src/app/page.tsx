@@ -49,11 +49,12 @@ const categories = [
 export default function LandingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [showTesterModal, setShowTesterModal] = useState(false);
   
   const slides = [
-    "bg-gradient-to-b from-[#416ACC] to-[#0B3D91]",
-    "bg-gradient-to-tr from-[#0B3D91] to-[#416ACC]",
-    "bg-gradient-to-r from-[#416ACC] to-[#0B3D91]"
+    "bg-[url('/hero-3.png')] bg-cover bg-center bg-no-repeat",
+    "bg-[url('/hero-1.png')] bg-cover bg-center bg-no-repeat",
+    "bg-[url('/hero-2.png')] bg-cover bg-center bg-no-repeat"
   ];
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -61,6 +62,11 @@ export default function LandingPage() {
 
   // Auto slide and fetch products
   useEffect(() => {
+    if (!sessionStorage.getItem('tester_alert_shown')) {
+      setShowTesterModal(true);
+      sessionStorage.setItem('tester_alert_shown', 'true');
+    }
+
     const timer = setInterval(nextSlide, 5000);
     
     const fetchProducts = async () => {
@@ -250,6 +256,48 @@ export default function LandingPage() {
           </Link>
         </div>
       </section> */}
+
+      {/* Tester Modal */}
+      {showTesterModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowTesterModal(false)}></div>
+          <div className="relative bg-white shadow-2xl rounded-2xl w-full max-w-md p-8 overflow-hidden transform transition-all m-4">
+            <div className="relative z-10">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto">
+                <span className="text-amber-500 text-6xl">⚠️</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-4 text-center">
+                Attention to Tester!
+              </h3>
+              <p className="text-slate-600 text-sm mb-8 leading-relaxed text-center">
+                Aplikasi ini terhubung ke <i>server backend</i> yang mungkin sedang dalam keadaan <span className="font-semibold text-slate-800">offline/tidur</span>. Mohon hubungi pembuat aplikasi terlebih dahulu agar <span className="font-semibold text-slate-800">server backend</span> dapat diaktifkan kembali dan kamu bisa menikmati pengalaman penuh fitur-fiturnya!
+              </p>
+              
+              <div className="flex justify-center gap-4 mb-8">
+                <a href="https://instagram.com/nadhifibr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-pink-100 hover:text-pink-600 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                </a>
+                <a href="https://linkedin.com/in/muhammad-nadhif-ibrahim" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-blue-100 hover:text-blue-600 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                </a>
+                <a href="https://github.com/nadhifibr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                </a>
+                <a href="https://nadhifibr.site" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-emerald-100 hover:text-emerald-600 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                </a>
+              </div>
+              
+              <Button 
+                onClick={() => setShowTesterModal(false)}
+                className="w-full h-11 bg-[#0F172A] text-white hover:bg-[#0F172A]/90 font-medium rounded-lg cursor-pointer"
+              >
+                Mengerti
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
