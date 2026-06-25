@@ -71,8 +71,8 @@ export default function LandingPage() {
     
     const fetchProducts = async () => {
       try {
-        const res = await api.get('/products/');
-        setFeaturedProducts(res.data.slice(0, 18)); // Top 18 products
+        const res = await api.get('/products/', { params: { page_size: 18 } });
+        setFeaturedProducts(res.data.results || []); // Top 18 products
       } catch (err) {
         console.error("Failed to fetch products", err);
       }

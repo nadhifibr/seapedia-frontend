@@ -42,6 +42,10 @@ export default function ProductsPage() {
   // Search Type (Auto Apply)
   const [searchType, setSearchType] = useState<'PRODUCTS' | 'STORES'>('PRODUCTS');
   
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  
   // Pending States (UI state before applying)
   const [categories, setCategories] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
@@ -67,7 +71,7 @@ export default function ProductsPage() {
   // Sync Search Type changes
   useEffect(() => {
     fetchData();
-  }, [searchType, queryParam, activeCategories, activeLocations, activeMinRating, activeMinPrice, activeMaxPrice, activeSort]);
+  }, [searchType, queryParam, activeCategories, activeLocations, activeMinRating, activeMinPrice, activeMaxPrice, activeSort, currentPage]);
 
   const applyFilters = () => {
     setActiveCategories(categories);
@@ -76,6 +80,7 @@ export default function ProductsPage() {
     setActiveMinPrice(minPrice);
     setActiveMaxPrice(maxPrice);
     setActiveSort(sort);
+    setCurrentPage(1); // Reset page on filter
   };
 
   const fetchData = async () => {
@@ -91,21 +96,26 @@ export default function ProductsPage() {
             max_price: activeMaxPrice || undefined,
             min_rating: activeMinRating || undefined,
             sort: activeSort,
+            page: currentPage,
           }
         });
-        setItems(res.data);
+        setItems(res.data.results || []);
+        setTotalPages(Math.ceil((res.data.count || 0) / 24));
       } else {
         const res = await api.get('/stores/', {
           params: {
             q: queryParam,
             location: activeLocations.length > 0 ? activeLocations.join(',') : undefined,
+            page: currentPage,
           }
         });
-        setItems(res.data);
+        setItems(res.data.results || []);
+        setTotalPages(Math.ceil((res.data.count || 0) / 24));
       }
     } catch (err) {
       console.error('Failed to fetch data', err);
       setItems([]);
+      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
@@ -119,6 +129,11 @@ export default function ProductsPage() {
     setCategories(prev => prev.includes(val) ? prev.filter(c => c !== val) : [...prev, val]);
   };
 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       
@@ -129,13 +144,13 @@ export default function ProductsPage() {
           <div className="flex bg-slate-100 p-1 rounded-md w-fit">
             <button
               className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-colors ${searchType === 'PRODUCTS' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
-              onClick={() => setSearchType('PRODUCTS')}
+              onClick={() => { setSearchType('PRODUCTS'); setCurrentPage(1); }}
             >
               Products
             </button>
             <button
               className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-colors ${searchType === 'STORES' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
-              onClick={() => setSearchType('STORES')}
+              onClick={() => { setSearchType('STORES'); setCurrentPage(1); }}
             >
               Stores
             </button>
@@ -145,7 +160,7 @@ export default function ProductsPage() {
         {searchType === 'PRODUCTS' && (
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-500">Urutkan:</span>
-            <Select value={sort} onValueChange={(val) => { if (val) { setSort(val); setActiveSort(val); } }}>
+            <Select value={sort} onValueChange={(val) => { if (val) { setSort(val); setActiveSort(val); setCurrentPage(1); } }}>
               <SelectTrigger className="w-[180px] h-9">
                 <SelectValue placeholder="Urutkan">
                   {sort === 'newest' ? 'Terbaru' : sort === 'price_asc' ? 'Harga: Rendah ke Tinggi' : sort === 'price_desc' ? 'Harga: Tinggi ke Rendah' : 'Terbaru'}
@@ -288,111 +303,174 @@ export default function ProductsPage() {
         </div>
 
         {/* Content Grid */}
-        <div className="flex-1">
+        <div className="flex-1 flex flex-col">
           {isLoading ? (
-            <div className="flex justify-center items-center h-64">
+            <div className="flex justify-center items-center h-64 flex-1">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : items.length === 0 ? (
-            <div className="text-center py-20 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+            <div className="text-center py-20 bg-slate-50 rounded-lg border border-dashed border-slate-200 flex-1">
               <p className="text-xl font-semibold text-slate-600">No results found</p>
               <p className="text-slate-500 mt-2">Coba sesuaikan filter atau pencarianmu.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-              {items.map((item) => (
-                searchType === 'PRODUCTS' ? (
-                  <Link href={`/products/${item.id}`} key={item.id} className="block group/card h-full">
-                    <Card className="h-full overflow-hidden flex flex-col bg-transparent border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
-                      {/* Image Container */}
-                      <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden rounded-[10px]">
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 flex-1 content-start">
+                {items.map((item) => (
+                  searchType === 'PRODUCTS' ? (
+                    <Link href={`/products/${item.id}`} key={item.id} className="block group/card h-full">
+                      <Card className="h-full overflow-hidden flex flex-col bg-transparent border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
+                        {/* Image Container */}
+                        <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden rounded-[10px]">
+                          {item.image_url ? (
+                            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Fish className="w-12 h-12 opacity-50" />
+                          )}
+                          {item.stock === 0 && (
+                            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-bold z-10">
+                              HABIS
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="p-2.5 md:p-3 flex flex-col flex-grow">
+                          {/* Product Name */}
+                          <h3 className="text-[13px] md:text-sm text-slate-800 line-clamp-2 leading-tight">
+                            {item.name}
+                          </h3>
+                          
+                          {/* Price */}
+                          <div className="text-sm md:text-base font-bold text-slate-900 mt-1 mb-1">
+                            Rp {Number(item.price).toLocaleString('id-ID')}
+                          </div>
+                          
+                          {/* Rating & Sold */}
+                          <div className="mt-auto pt-1 flex flex-col gap-1.5 text-[11px] text-slate-500">
+                            {/* Store / Location Swap */}
+                            {item.store && (
+                              <div className="relative h-[16px] overflow-hidden w-full flex items-center text-slate-500 cursor-default">
+                                {/* Default: Store Name */}
+                                <div className="absolute inset-0 flex items-center transition-transform duration-300 group-hover/card:-translate-y-full">
+                                  <Store className="w-3 h-3 mr-1" />
+                                  <span className="line-clamp-1">{item.store.name}</span>
+                                </div>
+                                {/* Hover: Location */}
+                                <div className="absolute inset-0 flex items-center transition-transform duration-300 translate-y-full group-hover/card:translate-y-0 text-slate-600">
+                                  <MapPin className="w-3 h-3 mr-1" />
+                                  <span className="line-clamp-1">{item.store.location ? item.store.location.replace('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Unknown'}</span>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center">
+                              <Star className="w-3 h-3 text-yellow-400 fill-yellow-400 mr-1" />
+                              <span>{item.average_rating > 0 ? item.average_rating : '-'}</span>
+                              <span className="mx-1.5 text-slate-300 text-[10px]">|</span>
+                              <span>{item.sold_count || 0} terjual</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
+                  ) : (
+                    <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg">
+                      <div className="h-40 bg-slate-100 flex items-center justify-center text-slate-300">
                         {item.image_url ? (
                           <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
-                          <Fish className="w-12 h-12 opacity-50" />
-                        )}
-                        {item.stock === 0 && (
-                          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-bold z-10">
-                            HABIS
-                          </div>
+                          <StoreIcon className="w-16 h-16" />
                         )}
                       </div>
-                      
-                      {/* Content */}
-                      <div className="p-2.5 md:p-3 flex flex-col flex-grow">
-                        {/* Product Name */}
-                        <h3 className="text-[13px] md:text-sm text-slate-800 line-clamp-2 leading-tight">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2 line-clamp-1">
                           {item.name}
-                        </h3>
-                        
-                        {/* Price */}
-                        <div className="text-sm md:text-base font-bold text-slate-900 mt-1 mb-1">
-                          Rp {Number(item.price).toLocaleString('id-ID')}
-                        </div>
-                        
-                        {/* Rating & Sold */}
-                        <div className="mt-auto pt-1 flex flex-col gap-1.5 text-[11px] text-slate-500">
-                          {/* Store / Location Swap */}
-                          {item.store && (
-                            <div className="relative h-[16px] overflow-hidden w-full flex items-center text-slate-500 cursor-default">
-                              {/* Default: Store Name */}
-                              <div className="absolute inset-0 flex items-center transition-transform duration-300 group-hover/card:-translate-y-full">
-                                <Store className="w-3 h-3 mr-1" />
-                                <span className="line-clamp-1">{item.store.name}</span>
-                              </div>
-                              {/* Hover: Location */}
-                              <div className="absolute inset-0 flex items-center transition-transform duration-300 translate-y-full group-hover/card:translate-y-0 text-slate-600">
-                                <MapPin className="w-3 h-3 mr-1" />
-                                <span className="line-clamp-1">{item.store.location ? item.store.location.replace('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Unknown'}</span>
-                              </div>
-                            </div>
-                          )}
-                          
-                          <div className="flex items-center">
-                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400 mr-1" />
-                            <span>{item.average_rating > 0 ? item.average_rating : '-'}</span>
-                            <span className="mx-1.5 text-slate-300 text-[10px]">|</span>
-                            <span>{item.sold_count || 0} terjual</span>
+                          <ShieldCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="mt-auto">
+                        {item.location && (
+                          <div className="flex items-center text-xs text-slate-500 mb-2 font-medium">
+                            <MapPin className="w-3.5 h-3.5 mr-1 text-primary" />
+                            {item.location.replace('_', ' ')}
                           </div>
-                        </div>
-                      </div>
+                        )}
+                        <p className="text-sm text-slate-600 line-clamp-2">
+                          {item.description || 'No description available.'}
+                        </p>
+                      </CardContent>
+                      <CardFooter>
+                        <Link href={`/store/${item.slug}`} className="w-full">
+                          <Button variant="outline" className="w-full text-primary border-primary hover:bg-primary/5">Kunjungi Toko</Button>
+                        </Link>
+                      </CardFooter>
                     </Card>
-                  </Link>
-                ) : (
-                  <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg">
-                    <div className="h-40 bg-slate-100 flex items-center justify-center text-slate-300">
-                      {item.image_url ? (
-                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <StoreIcon className="w-16 h-16" />
-                      )}
-                    </div>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center gap-2 line-clamp-1">
-                        {item.name}
-                        <ShieldCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="mt-auto">
-                      {item.location && (
-                        <div className="flex items-center text-xs text-slate-500 mb-2 font-medium">
-                          <MapPin className="w-3.5 h-3.5 mr-1 text-primary" />
-                          {item.location.replace('_', ' ')}
-                        </div>
-                      )}
-                      <p className="text-sm text-slate-600 line-clamp-2">
-                        {item.description || 'No description available.'}
-                      </p>
-                    </CardContent>
-                    <CardFooter>
-                      <Link href={`/store/${item.slug}`} className="w-full">
-                        <Button variant="outline" className="w-full text-primary border-primary hover:bg-primary/5">Kunjungi Toko</Button>
-                      </Link>
-                    </CardFooter>
-                  </Card>
-                )
-              ))}
-            </div>
+                  )
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-12 mb-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  
+                  <div className="flex items-center gap-1 mx-2 overflow-x-auto max-w-[200px] sm:max-w-none custom-scrollbar pb-2 sm:pb-0">
+                    {[...Array(totalPages)].map((_, i) => {
+                      const pageNum = i + 1;
+                      // Logic to show limited pages if there are too many (e.g. show first, last, and current surroundings)
+                      if (totalPages > 7) {
+                        if (
+                          pageNum === 1 || 
+                          pageNum === totalPages || 
+                          (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                        ) {
+                          return (
+                            <button
+                              key={i}
+                              className={`w-8 h-8 flex-shrink-0 rounded-md flex items-center justify-center text-sm font-medium transition-colors ${currentPage === pageNum ? 'bg-primary text-white' : 'hover:bg-slate-100 text-slate-600'}`}
+                              onClick={() => handlePageChange(pageNum)}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        } else if (
+                          pageNum === currentPage - 2 || 
+                          pageNum === currentPage + 2
+                        ) {
+                          return <span key={i} className="text-slate-400 px-1">...</span>;
+                        }
+                        return null;
+                      }
+
+                      return (
+                        <button
+                          key={i}
+                          className={`w-8 h-8 flex-shrink-0 rounded-md flex items-center justify-center text-sm font-medium transition-colors ${currentPage === pageNum ? 'bg-primary text-white' : 'hover:bg-slate-100 text-slate-600'}`}
+                          onClick={() => handlePageChange(pageNum)}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
