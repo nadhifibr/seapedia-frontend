@@ -39,7 +39,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-[#0B3D91] sticky top-0 z-10 shadow-sm py-3">
+    <nav className="bg-[#0B3D91] sticky top-0 z-50 shadow-sm py-3">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-6">
 
         {/* Left: Logo */}
@@ -101,18 +101,18 @@ export function Navbar() {
                 <div className="absolute right-0 top-[100%] mt-0 w-48 bg-white rounded-md shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-slate-100 opacity-0 invisible group-hover/navuser:opacity-100 group-hover/navuser:visible transition-all duration-200 z-50 overflow-hidden transform origin-top-right scale-95 group-hover/navuser:scale-100">
                   <div className="py-1">
                     {/* Role switching options */}
-                    {user?.roles && user.roles.length > 1 && (
-                      <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50 border-b border-slate-100">
+                    {/* {user?.roles && user.roles.length > 1 && (
+                      <div className="px-4 py-2 text-[10px] font-bold text-slate-400 tracking-wider bg-slate-50/50 border-b border-slate-100">
                         Ganti Role
                       </div>
-                    )}
+                    )} */}
                     {user?.roles && user.roles.length > 1 && user.roles.map((role) => (
                       <button
                         key={role}
                         onClick={() => switchRole(role)}
                         className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${user.active_role === role ? 'bg-blue-50 text-[#0B3D91] font-medium' : 'text-slate-700 hover:bg-slate-50'}`}
                       >
-                        {role === 'BUYER' ? 'Buyer (Pembeli)' : role === 'SELLER' ? 'Seller (Penjual)' : 'Driver'}
+                        {role === 'BUYER' ? 'Buyer' : role === 'SELLER' ? 'Seller' : 'Driver'}
                         {user.active_role === role && (
                           <div className="w-1.5 h-1.5 rounded-full bg-[#0B3D91]"></div>
                         )}

@@ -117,12 +117,12 @@ export default function LandingPage() {
       {/* Shop by Category Section */}
       <section className="pt-16 pb-8 px-4 bg-slate-50">
         <div className="max-w-7xl mx-auto">
-          {/* <div className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Shop by Category</h2>
             <p className="text-slate-500 max-w-2xl mx-auto">
               Find everything you need for your next marine adventure.
             </p>
-          </div> */}
+          </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
             {categories.map((cat) => (
@@ -158,19 +158,19 @@ export default function LandingPage() {
       {/* Featured Products Section */}
       <section className="pt-8 pb-16 px-4 bg-slate-50">
         <div className="max-w-7xl mx-auto">
-          {/* <div className="text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Featured Products</h2>
             <p className="text-slate-500 max-w-2xl mx-auto">
               Discover our top picks and fresh arrivals from trusted sellers.
             </p>
-          </div> */}
+          </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
             {featuredProducts.map((item) => (
               <Link href={`/products/${item.id}`} key={item.id} className="block group/card h-full">
-                <Card className="h-full overflow-hidden flex flex-col bg-white border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
+                <Card className="h-full overflow-hidden flex flex-col bg-transparent border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
                   {/* Image Container */}
-                  <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden">
+                  <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden rounded-[10px]">
                     {item.image_url ? (
                       <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
@@ -208,7 +208,7 @@ export default function LandingPage() {
                           {/* Hover: Location */}
                           <div className="absolute inset-0 flex items-center transition-transform duration-300 translate-y-full group-hover/card:translate-y-0 text-slate-600">
                             <MapPin className="w-3 h-3 mr-1" />
-                            <span className="line-clamp-1">{item.store.location?.replace('_', ' ') || 'Unknown'}</span>
+                            <span className="line-clamp-1">{item.store.location ? item.store.location.replace('_', ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) : 'Unknown'}</span>
                           </div>
                         </div>
                       )}
