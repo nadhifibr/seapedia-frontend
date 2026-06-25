@@ -239,7 +239,7 @@ export default function LandingPage() {
       
 
       {/* Review Placeholder */}
-      <section className="bg-slate-900 py-24 px-4 text-white">
+      {/* <section className="bg-slate-900 py-24 px-4 text-white">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h2 className="text-3xl font-bold">Help Us Improve!</h2>
           <p className="text-slate-300">
@@ -249,7 +249,7 @@ export default function LandingPage() {
             <Button size="lg" variant="secondary" className="h-12 px-8 text-lg">Leave an App Review</Button>
           </Link>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
