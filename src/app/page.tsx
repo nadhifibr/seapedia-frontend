@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Store, TrendingUp, Truck, ChevronLeft, ChevronRight, Fish, MapPin } from 'lucide-react';
+import { Store, TrendingUp, Truck, ChevronLeft, ChevronRight, Fish, MapPin, Star } from 'lucide-react';
 import api from '@/lib/api';
 
 const categories = [
@@ -66,7 +66,7 @@ export default function LandingPage() {
     const fetchProducts = async () => {
       try {
         const res = await api.get('/products/');
-        setFeaturedProducts(res.data.slice(0, 8)); // Top 8 products
+        setFeaturedProducts(res.data.slice(0, 18)); // Top 18 products
       } catch (err) {
         console.error("Failed to fetch products", err);
       }
@@ -115,29 +115,38 @@ export default function LandingPage() {
       </section>
 
       {/* Shop by Category Section */}
-      <section className="py-16 px-4 bg-slate-50">
+      <section className="pt-16 pb-8 px-4 bg-slate-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+          {/* <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Shop by Category</h2>
             <p className="text-slate-500 max-w-2xl mx-auto">
               Find everything you need for your next marine adventure.
             </p>
-          </div>
+          </div> */}
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
             {categories.map((cat) => (
               <Link href={`/products?category=${cat.id}`} key={cat.id} className="block group">
-                <Card className="h-full border-none shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden bg-white">
-                  <div className="aspect-square bg-transparent relative overflow-hidden">
-                    <img 
-                      src={cat.image} 
-                      alt={cat.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                    />
-                  </div>
-                  <CardContent className="p-3 md:p-4 text-center md:text-left">
-                    <h3 className="font-semibold text-sm md:text-base text-slate-900 mb-1">{cat.title}</h3>
-                    <p className="text-[10px] md:text-xs text-slate-500 line-clamp-2">{cat.description}</p>
+                <Card className="aspect-square md:aspect-[4/5] border-none shadow-md hover:shadow-xl transition-all duration-500 overflow-hidden relative">
+                  {/* Background Image */}
+                  <img 
+                    src={cat.image} 
+                    alt={cat.title} 
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
+                  />
+                  {/* Overlay Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent transition-opacity duration-500" />
+                  
+                  {/* Content Container */}
+                  <CardContent className="absolute inset-0 p-4 flex flex-col justify-end">
+                    <div className="relative transform group-hover:-translate-y-8 md:group-hover:-translate-y-15 transition-transform duration-500 ease-out">
+                      <h3 className="font-bold text-base md:text-lg text-white mb-1 drop-shadow-md">{cat.title}</h3>
+                      <div className="absolute top-full left-0 w-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-75">
+                        <p className="text-xs md:text-sm text-slate-200 line-clamp-3 drop-shadow-sm pb-1">
+                          {cat.description}
+                        </p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </Link>
@@ -147,62 +156,73 @@ export default function LandingPage() {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 px-4 bg-white">
+      <section className="pt-8 pb-16 px-4 bg-slate-50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+          {/* <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Featured Products</h2>
             <p className="text-slate-500 max-w-2xl mx-auto">
               Discover our top picks and fresh arrivals from trusted sellers.
             </p>
-          </div>
+          </div> */}
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
             {featuredProducts.map((item) => (
-              <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg">
-                <div className="h-48 bg-slate-100 flex items-center justify-center text-slate-300 relative">
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <Fish className="w-16 h-16" />
-                  )}
-                  {item.stock === 0 && (
-                    <div className="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 m-2 rounded text-xs font-bold">
-                      OUT OF STOCK
-                    </div>
-                  )}
-                </div>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    {item.store ? (
-                      <div className="flex flex-col">
-                        <Link href={`/store/${item.store.slug}`} className="text-xs font-medium text-primary line-clamp-1 hover:underline">
-                          {item.store.name}
-                        </Link>
-                        {item.store.location && (
-                          <div className="flex items-center text-[10px] text-slate-500 mt-0.5">
-                            <MapPin className="w-3 h-3 mr-0.5" />
-                            {item.store.location.replace('_', ' ')}
-                          </div>
-                        )}
-                      </div>
+              <Link href={`/products/${item.id}`} key={item.id} className="block group/card h-full">
+                <Card className="h-full overflow-hidden flex flex-col bg-white border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
+                  {/* Image Container */}
+                  <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="text-xs font-medium text-primary line-clamp-1">Unknown Store</div>
+                      <Fish className="w-12 h-12 opacity-50" />
                     )}
-                    <div className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-full text-slate-500 uppercase tracking-wide self-start">
-                      {item.category?.replace('_', ' ')}
+                    {item.stock === 0 && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-bold z-10">
+                        HABIS
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="p-2.5 md:p-3 flex flex-col flex-grow">
+                    {/* Product Name */}
+                    <h3 className="text-[13px] md:text-sm text-slate-800 line-clamp-2 leading-tight">
+                      {item.name}
+                    </h3>
+                    
+                    {/* Price */}
+                    <div className="text-sm md:text-base font-bold text-slate-900 mt-1 mb-1">
+                      Rp {Number(item.price).toLocaleString('id-ID')}
+                    </div>
+                    
+                    {/* Rating & Sold */}
+                    <div className="mt-auto pt-1 flex flex-col gap-1.5 text-[11px] text-slate-500">
+                      {/* Store / Location Swap */}
+                      {item.store && (
+                        <div className="relative h-[16px] overflow-hidden w-full flex items-center text-slate-500 cursor-default">
+                          {/* Default: Store Name */}
+                          <div className="absolute inset-0 flex items-center transition-transform duration-300 group-hover/card:-translate-y-full">
+                            <Store className="w-3 h-3 mr-1" />
+                            <span className="line-clamp-1">{item.store.name}</span>
+                          </div>
+                          {/* Hover: Location */}
+                          <div className="absolute inset-0 flex items-center transition-transform duration-300 translate-y-full group-hover/card:translate-y-0 text-slate-600">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            <span className="line-clamp-1">{item.store.location?.replace('_', ' ') || 'Unknown'}</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center">
+                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400 mr-1" />
+                        <span>{item.average_rating > 0 ? item.average_rating : '-'}</span>
+                        <span className="mx-1.5 text-slate-300 text-[10px]">|</span>
+                        <span>{item.sold_count} terjual</span>
+                      </div>
                     </div>
                   </div>
-                  <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="mt-auto">
-                  <div className="text-xl font-bold">Rp {Number(item.price).toLocaleString('id-ID')}</div>
-                </CardContent>
-                <CardFooter>
-                  <Link href={`/products/${item.id}`} className="w-full">
-                    <Button variant="outline" className="w-full border-[#0F172A] text-[#0F172A] hover:bg-slate-100">View Details</Button>
-                  </Link>
-                </CardFooter>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
 
