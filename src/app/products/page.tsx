@@ -5,10 +5,32 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Filter, SlidersHorizontal, Fish, StoreIcon, ShieldCheck, MapPin } from 'lucide-react';
+import { Filter, SlidersHorizontal, Fish, StoreIcon, ShieldCheck, MapPin, Store, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import api from '@/lib/api';
+
+const LOCATION_OPTIONS = [
+  { value: 'JAKARTA', label: 'Jakarta' },
+  { value: 'TANGERANG', label: 'Tangerang' },
+  { value: 'ANYER', label: 'Anyer' },
+  { value: 'BALI', label: 'Bali' },
+  { value: 'LOMBOK', label: 'Lombok' },
+  { value: 'BATAM', label: 'Batam' },
+  { value: 'MANADO', label: 'Manado' },
+  { value: 'MAKASSAR', label: 'Makassar' },
+  { value: 'SURABAYA', label: 'Surabaya' },
+  { value: 'RAJA_AMPAT', label: 'Raja Ampat' },
+];
+
+const CATEGORY_OPTIONS = [
+  { value: 'FISHING_GEAR', label: 'Fishing Gear' },
+  { value: 'DIVING_GEAR', label: 'Diving Gear' },
+  { value: 'MARINE_EQUIPMENT', label: 'Marine Equipment' },
+  { value: 'OCEAN_APPAREL', label: 'Ocean Apparel' },
+  { value: 'OCEAN_ACCESSORIES', label: 'Ocean Accessories' },
+  { value: 'OTHER', label: 'Other' },
+];
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
@@ -17,17 +39,44 @@ export default function ProductsPage() {
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Filter, Sort States
+  // Search Type (Auto Apply)
   const [searchType, setSearchType] = useState<'PRODUCTS' | 'STORES'>('PRODUCTS');
-  const [category, setCategory] = useState('ALL');
-  const [location, setLocation] = useState('ALL');
+  
+  // Pending States (UI state before applying)
+  const [categories, setCategories] = useState<string[]>([]);
+  const [locations, setLocations] = useState<string[]>([]);
+  const [minRating, setMinRating] = useState<string>('');
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
   const [sort, setSort] = useState('newest');
 
+  // Active States (Applied filters for API)
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
+  const [activeLocations, setActiveLocations] = useState<string[]>([]);
+  const [activeMinRating, setActiveMinRating] = useState<string>('');
+  const [activeMinPrice, setActiveMinPrice] = useState<string>('');
+  const [activeMaxPrice, setActiveMaxPrice] = useState<string>('');
+  const [activeSort, setActiveSort] = useState('newest');
+
+  // Accordion States
+  const [isLocOpen, setIsLocOpen] = useState(true);
+  const [isCatOpen, setIsCatOpen] = useState(true);
+  const [isRatingOpen, setIsRatingOpen] = useState(true);
+  const [isPriceOpen, setIsPriceOpen] = useState(true);
+
+  // Sync Search Type changes
   useEffect(() => {
-    // Debounce is less necessary now since search is triggered by navigation, 
-    // but we can keep a small delay or just fetch immediately
     fetchData();
-  }, [queryParam, category, location, sort, searchType]);
+  }, [searchType, queryParam, activeCategories, activeLocations, activeMinRating, activeMinPrice, activeMaxPrice, activeSort]);
+
+  const applyFilters = () => {
+    setActiveCategories(categories);
+    setActiveLocations(locations);
+    setActiveMinRating(minRating);
+    setActiveMinPrice(minPrice);
+    setActiveMaxPrice(maxPrice);
+    setActiveSort(sort);
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -36,9 +85,12 @@ export default function ProductsPage() {
         const res = await api.get('/products/', {
           params: {
             q: queryParam,
-            category: category,
-            location: location,
-            sort: sort,
+            category: activeCategories.length > 0 ? activeCategories.join(',') : undefined,
+            location: activeLocations.length > 0 ? activeLocations.join(',') : undefined,
+            min_price: activeMinPrice || undefined,
+            max_price: activeMaxPrice || undefined,
+            min_rating: activeMinRating || undefined,
+            sort: activeSort,
           }
         });
         setItems(res.data);
@@ -46,7 +98,7 @@ export default function ProductsPage() {
         const res = await api.get('/stores/', {
           params: {
             q: queryParam,
-            location: location,
+            location: activeLocations.length > 0 ? activeLocations.join(',') : undefined,
           }
         });
         setItems(res.data);
@@ -59,27 +111,30 @@ export default function ProductsPage() {
     }
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Marketplace Catalog</h1>
-        <p className="text-muted-foreground">Browse our fresh selections from real sellers</p>
-      </div>
+  const handleLocationToggle = (val: string) => {
+    setLocations(prev => prev.includes(val) ? prev.filter(l => l !== val) : [...prev, val]);
+  };
 
-      {/* Control Bar: Search, Filter, Sort */}
-      <div className="flex flex-col gap-4 mb-8 bg-slate-50 p-4 rounded-lg border">
-        {/* Toggle Type */}
+  const handleCategoryToggle = (val: string) => {
+    setCategories(prev => prev.includes(val) ? prev.filter(c => c !== val) : [...prev, val]);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      
+      {/* Top Bar for Search Type & Sort */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b">
         <div className="flex items-center gap-4">
           <span className="text-sm font-medium text-slate-500">I am looking for:</span>
-          <div className="flex bg-slate-200/50 p-1 rounded-md w-fit">
+          <div className="flex bg-slate-100 p-1 rounded-md w-fit">
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${searchType === 'PRODUCTS' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-colors ${searchType === 'PRODUCTS' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
               onClick={() => setSearchType('PRODUCTS')}
             >
               Products
             </button>
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-sm transition-colors ${searchType === 'STORES' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-colors ${searchType === 'STORES' ? 'bg-white shadow-sm text-primary' : 'text-slate-500 hover:text-slate-700'}`}
               onClick={() => setSearchType('STORES')}
             >
               Stores
@@ -87,171 +142,260 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* Global Filters (Applies to both) */}
-        <div className="flex gap-4 border-t pt-4 mt-2">
-          {/* Location Filter */}
-          <div className="w-40">
-            <Select value={location} onValueChange={(val) => setLocation(val || 'ALL')}>
-              <SelectTrigger className="bg-white">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-slate-500" />
-                  <SelectValue placeholder="Location" />
-                </div>
+        {searchType === 'PRODUCTS' && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-500">Urutkan:</span>
+            <Select value={sort} onValueChange={(val) => { if (val) { setSort(val); setActiveSort(val); } }}>
+              <SelectTrigger className="w-[180px] h-9">
+                <SelectValue placeholder="Urutkan">
+                  {sort === 'newest' ? 'Terbaru' : sort === 'price_asc' ? 'Harga: Rendah ke Tinggi' : sort === 'price_desc' ? 'Harga: Tinggi ke Rendah' : 'Terbaru'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All Locations</SelectItem>
-                <SelectItem value="JAKARTA">Jakarta</SelectItem>
-                <SelectItem value="TANGERANG">Tangerang</SelectItem>
-                <SelectItem value="ANYER">Anyer</SelectItem>
-                <SelectItem value="BALI">Bali</SelectItem>
-                <SelectItem value="LOMBOK">Lombok</SelectItem>
-                <SelectItem value="BATAM">Batam</SelectItem>
-                <SelectItem value="MANADO">Manado</SelectItem>
-                <SelectItem value="MAKASSAR">Makassar</SelectItem>
-                <SelectItem value="SURABAYA">Surabaya</SelectItem>
-                <SelectItem value="RAJA_AMPAT">Raja Ampat</SelectItem>
+                <SelectItem value="newest">Terbaru</SelectItem>
+                <SelectItem value="price_asc">Harga: Rendah ke Tinggi</SelectItem>
+                <SelectItem value="price_desc">Harga: Tinggi ke Rendah</SelectItem>
               </SelectContent>
             </Select>
           </div>
-
-          {/* Filters (Only for Products) */}
-          {searchType === 'PRODUCTS' && (
-            <>
-              {/* Category Filter */}
-          <div className="w-40">
-            <Select value={category} onValueChange={(val) => setCategory(val || 'ALL')}>
-              <SelectTrigger className="bg-white">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-slate-500" />
-                  <SelectValue placeholder="Category" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Categories</SelectItem>
-                <SelectItem value="FISHING_GEAR">Fishing Gear</SelectItem>
-                <SelectItem value="DIVING_GEAR">Diving Gear</SelectItem>
-                <SelectItem value="MARINE_EQUIPMENT">Marine Equipment</SelectItem>
-                <SelectItem value="OCEAN_APPAREL">Ocean Apparel</SelectItem>
-                <SelectItem value="OCEAN_ACCESSORIES">Accessories</SelectItem>
-                <SelectItem value="OTHER">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Sort */}
-          <div className="w-44">
-            <Select value={sort} onValueChange={(val) => setSort(val || 'newest')}>
-              <SelectTrigger className="bg-white">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-slate-500" />
-                  <SelectValue placeholder="Sort by" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="price_asc">Price: Low to High</SelectItem>
-                <SelectItem value="price_desc">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-            </>
-          )}
-        </div>
+        )}
       </div>
 
-      {isLoading ? (
-        <div className="py-24 text-center text-slate-500 text-lg">Searching...</div>
-      ) : items.length === 0 ? (
-        <div className="text-center py-24 bg-slate-50 rounded-lg text-slate-500">
-          <Fish className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-          <h2 className="text-xl font-semibold text-slate-700">No {searchType === 'PRODUCTS' ? 'products' : 'stores'} found</h2>
-          <p>Try adjusting your search or filters.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {items.map((item) => (
-            searchType === 'PRODUCTS' ? (
-              <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg">
-                <div className="h-48 bg-slate-100 flex items-center justify-center text-slate-300 relative">
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <Fish className="w-16 h-16" />
-                  )}
-                  {item.stock === 0 && (
-                    <div className="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 m-2 rounded text-xs font-bold">
-                      OUT OF STOCK
+      <div className="flex flex-col md:flex-row gap-8">
+        
+        {/* Sidebar Filter */}
+        <div className="w-full md:w-64 flex-shrink-0 flex flex-col gap-6">
+          
+          {/* Filter Lokasi */}
+          <div className="border-b pb-4">
+            <button className="flex items-center justify-between w-full font-semibold text-slate-800 mb-4" onClick={() => setIsLocOpen(!isLocOpen)}>
+              Lokasi
+              {isLocOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+            </button>
+            {isLocOpen && (
+              <div className="flex flex-col gap-2.5 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                {LOCATION_OPTIONS.map((loc) => (
+                  <label key={loc.value} className="flex items-center gap-3 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                      checked={locations.includes(loc.value)}
+                      onChange={() => handleLocationToggle(loc.value)}
+                    />
+                    <span className="text-sm text-slate-600 group-hover:text-slate-900">{loc.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {searchType === 'PRODUCTS' && (
+            <>
+              {/* Filter Kategori */}
+              <div className="border-b pb-4">
+                <button className="flex items-center justify-between w-full font-semibold text-slate-800 mb-4" onClick={() => setIsCatOpen(!isCatOpen)}>
+                  Kategori
+                  {isCatOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+                </button>
+                {isCatOpen && (
+                  <div className="flex flex-col gap-2.5">
+                    {CATEGORY_OPTIONS.map((cat) => (
+                      <label key={cat.value} className="flex items-center gap-3 cursor-pointer group">
+                        <input 
+                          type="checkbox" 
+                          className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                          checked={categories.includes(cat.value)}
+                          onChange={() => handleCategoryToggle(cat.value)}
+                        />
+                        <span className="text-sm text-slate-600 group-hover:text-slate-900">{cat.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Filter Rating */}
+              <div className="border-b pb-4">
+                <button className="flex items-center justify-between w-full font-semibold text-slate-800 mb-4" onClick={() => setIsRatingOpen(!isRatingOpen)}>
+                  Rating
+                  {isRatingOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+                </button>
+                {isRatingOpen && (
+                  <div className="flex flex-col gap-2.5">
+                    {[5, 4, 3, 2, 1].map((star) => (
+                      <label key={star} className="flex items-center gap-3 cursor-pointer group">
+                        <input 
+                          type="radio" 
+                          name="rating"
+                          value={star}
+                          className="w-4 h-4 border-slate-300 text-primary focus:ring-primary"
+                          checked={minRating === star.toString()}
+                          onChange={() => setMinRating(star.toString())}
+                        />
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-4 h-4 ${i < star ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200 fill-slate-200'}`} />
+                          ))}
+                          {star < 5 && <span className="text-sm text-slate-500 ml-1">ke atas</span>}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Filter Harga */}
+              <div className="border-b pb-4">
+                <button className="flex items-center justify-between w-full font-semibold text-slate-800 mb-4" onClick={() => setIsPriceOpen(!isPriceOpen)}>
+                  Harga
+                  {isPriceOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+                </button>
+                {isPriceOpen && (
+                  <div className="flex flex-col gap-3">
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">Rp</span>
+                      <Input 
+                        type="number" 
+                        placeholder="Harga Minimum" 
+                        className="pl-9 bg-slate-50"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                      />
                     </div>
-                  )}
-                </div>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between mb-1">
-                    {item.store ? (
-                      <div className="flex flex-col">
-                        <Link href={`/store/${item.store.slug}`} className="text-xs font-medium text-primary line-clamp-1 hover:underline">
-                          {item.store.name}
-                        </Link>
-                        {item.store.location && (
-                          <div className="flex items-center text-[10px] text-slate-500 mt-0.5">
-                            <MapPin className="w-3 h-3 mr-0.5" />
-                            {item.store.location.replace('_', ' ')}
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">Rp</span>
+                      <Input 
+                        type="number" 
+                        placeholder="Harga Maksimum" 
+                        className="pl-9 bg-slate-50"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          <Button 
+            className="w-full bg-[#0B3D91] hover:bg-[#082b66] text-white font-medium"
+            onClick={applyFilters}
+          >
+            Terapkan Filter
+          </Button>
+
+        </div>
+
+        {/* Content Grid */}
+        <div className="flex-1">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : items.length === 0 ? (
+            <div className="text-center py-20 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+              <p className="text-xl font-semibold text-slate-600">No results found</p>
+              <p className="text-slate-500 mt-2">Coba sesuaikan filter atau pencarianmu.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+              {items.map((item) => (
+                searchType === 'PRODUCTS' ? (
+                  <Link href={`/products/${item.id}`} key={item.id} className="block group/card h-full">
+                    <Card className="h-full overflow-hidden flex flex-col bg-transparent border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
+                      {/* Image Container */}
+                      <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden rounded-[10px]">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <Fish className="w-12 h-12 opacity-50" />
+                        )}
+                        {item.stock === 0 && (
+                          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-bold z-10">
+                            HABIS
                           </div>
                         )}
                       </div>
-                    ) : (
-                      <div className="text-xs font-medium text-primary line-clamp-1">Unknown Store</div>
-                    )}
-                    <div className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded-full text-slate-500 uppercase tracking-wide self-start">
-                      {item.category?.replace('_', ' ')}
-                    </div>
-                  </div>
-                  <CardTitle className="text-lg line-clamp-1">{item.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="mt-auto">
-                  <div className="text-xl font-bold">Rp {Number(item.price).toLocaleString('id-ID')}</div>
-                </CardContent>
-                <CardFooter>
-                  <Link href={`/products/${item.id}`} className="w-full">
-                    <Button variant="outline" className="w-full">View Details</Button>
+                      
+                      {/* Content */}
+                      <div className="p-2.5 md:p-3 flex flex-col flex-grow">
+                        {/* Product Name */}
+                        <h3 className="text-[13px] md:text-sm text-slate-800 line-clamp-2 leading-tight">
+                          {item.name}
+                        </h3>
+                        
+                        {/* Price */}
+                        <div className="text-sm md:text-base font-bold text-slate-900 mt-1 mb-1">
+                          Rp {Number(item.price).toLocaleString('id-ID')}
+                        </div>
+                        
+                        {/* Rating & Sold */}
+                        <div className="mt-auto pt-1 flex flex-col gap-1.5 text-[11px] text-slate-500">
+                          {/* Store / Location Swap */}
+                          {item.store && (
+                            <div className="relative h-[16px] overflow-hidden w-full flex items-center text-slate-500 cursor-default">
+                              {/* Default: Store Name */}
+                              <div className="absolute inset-0 flex items-center transition-transform duration-300 group-hover/card:-translate-y-full">
+                                <Store className="w-3 h-3 mr-1" />
+                                <span className="line-clamp-1">{item.store.name}</span>
+                              </div>
+                              {/* Hover: Location */}
+                              <div className="absolute inset-0 flex items-center transition-transform duration-300 translate-y-full group-hover/card:translate-y-0 text-slate-600">
+                                <MapPin className="w-3 h-3 mr-1" />
+                                <span className="line-clamp-1">{item.store.location ? item.store.location.replace('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Unknown'}</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center">
+                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400 mr-1" />
+                            <span>{item.average_rating > 0 ? item.average_rating : '-'}</span>
+                            <span className="mx-1.5 text-slate-300 text-[10px]">|</span>
+                            <span>{item.sold_count || 0} terjual</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
                   </Link>
-                </CardFooter>
-              </Card>
-            ) : (
-              <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg">
-                <div className="h-40 bg-slate-100 flex items-center justify-center text-slate-300">
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <StoreIcon className="w-16 h-16" />
-                  )}
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    {item.name}
-                    <ShieldCheck className="w-4 h-4 text-green-500" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="mt-auto">
-                  {item.location && (
-                    <div className="flex items-center text-xs text-slate-500 mb-2 font-medium">
-                      <MapPin className="w-3.5 h-3.5 mr-1 text-primary" />
-                      {item.location.replace('_', ' ')}
+                ) : (
+                  <Card key={item.id} className="overflow-hidden flex flex-col transition-hover hover:shadow-lg">
+                    <div className="h-40 bg-slate-100 flex items-center justify-center text-slate-300">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <StoreIcon className="w-16 h-16" />
+                      )}
                     </div>
-                  )}
-                  <p className="text-sm text-slate-600 line-clamp-3">
-                    {item.description || 'No description available for this store.'}
-                  </p>
-                </CardContent>
-                <CardFooter>
-                  <Link href={`/store/${item.slug}`} className="w-full">
-                    <Button variant="outline" className="w-full text-primary border-primary hover:bg-primary/5">Visit Store</Button>
-                  </Link>
-                </CardFooter>
-              </Card>
-            )
-          ))}
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg flex items-center gap-2 line-clamp-1">
+                        {item.name}
+                        <ShieldCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="mt-auto">
+                      {item.location && (
+                        <div className="flex items-center text-xs text-slate-500 mb-2 font-medium">
+                          <MapPin className="w-3.5 h-3.5 mr-1 text-primary" />
+                          {item.location.replace('_', ' ')}
+                        </div>
+                      )}
+                      <p className="text-sm text-slate-600 line-clamp-2">
+                        {item.description || 'No description available.'}
+                      </p>
+                    </CardContent>
+                    <CardFooter>
+                      <Link href={`/store/${item.slug}`} className="w-full">
+                        <Button variant="outline" className="w-full text-primary border-primary hover:bg-primary/5">Kunjungi Toko</Button>
+                      </Link>
+                    </CardFooter>
+                  </Card>
+                )
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
