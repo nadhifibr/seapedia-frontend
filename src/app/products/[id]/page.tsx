@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus, Minus } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
+import { ConfirmationModal } from '@/components/shared/ConfirmationModal';
+import { ToastNotification } from '@/components/shared/ToastNotification';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -28,6 +30,10 @@ export default function ProductDetailPage() {
   const [comment, setComment] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewError, setReviewError] = useState('');
+
+  // UI State
+  const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; title: string; message: string; onConfirm: () => void; confirmText?: string }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+  const [toastConfig, setToastConfig] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
 
   useEffect(() => {
     if (id) {
@@ -75,19 +81,24 @@ export default function ProductDetailPage() {
     setIsAddingToCart(true);
     try {
       await api.post('/cart/items/', { product_id: product.id, quantity: quantity });
-      alert(`Added ${quantity} item(s) to cart!`);
+      setToastConfig({ show: true, message: `Added ${quantity} item(s) to cart!` });
     } catch (err: any) {
       if (err.response?.data?.error_code === 'STORE_CONFLICT') {
-        const confirmClear = confirm(`Your cart already contains items from a different store. Do you want to clear your cart and add this product from ${product.store.name} instead?`);
-        if (confirmClear) {
-          try {
-            await api.delete('/cart/');
-            await api.post('/cart/items/', { product_id: product.id, quantity: quantity });
-            alert('Cart cleared and product added successfully!');
-          } catch (retryErr) {
-            alert('Failed to add product after clearing cart.');
+        setModalConfig({
+          isOpen: true,
+          title: 'Store Conflict',
+          message: `Your cart already contains items from a different store. Do you want to clear your cart and add this product from ${product.store.name} instead?`,
+          confirmText: 'Clear Cart & Add',
+          onConfirm: async () => {
+            try {
+              await api.delete('/cart/');
+              await api.post('/cart/items/', { product_id: product.id, quantity: quantity });
+              setToastConfig({ show: true, message: 'Cart cleared and product added successfully!' });
+            } catch (retryErr) {
+              alert('Failed to add product after clearing cart.');
+            }
           }
-        }
+        });
       } else {
         alert(err.response?.data?.detail || 'Failed to add to cart.');
       }
@@ -212,7 +223,7 @@ export default function ProductDetailPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
-                  className="flex-1" 
+                  className="flex-1 cursor-pointer" 
                   disabled={product.stock === 0 || !user || !user.roles.includes('BUYER') || isAddingToCart}
                   onClick={handleAddToCart}
                 >
@@ -268,7 +279,7 @@ export default function ProductDetailPage() {
                   {product.store.recent_products && product.store.recent_products.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       {product.store.recent_products.filter((p: any) => p.id !== product.id).slice(0, 3).map((p: any) => (
-                        <Link href={`/products/${p.id}`} key={p.id} className="block group/item h-full">
+                        <Link href={`/products/${p.id}`} key={p.id} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="block group/item h-full">
                           <Card className="h-full overflow-hidden flex flex-col bg-transparent border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
                             <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden rounded-[10px]">
                               {p.image_url ? (
@@ -319,7 +330,7 @@ export default function ProductDetailPage() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {relatedProducts.map((p: any) => (
-              <Link href={`/products/${p.id}`} key={p.id} className="block group/item h-full">
+              <Link href={`/products/${p.id}`} key={p.id} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="block group/item h-full">
                 <Card className="h-full overflow-hidden flex flex-col bg-transparent border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
                   <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden rounded-[10px]">
                     {p.image_url ? (
@@ -448,6 +459,21 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      <ToastNotification 
+        show={toastConfig.show} 
+        message={toastConfig.message} 
+        onClose={() => setToastConfig({ ...toastConfig, show: false })} 
+      />
+
+      <ConfirmationModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText || 'Confirm'}
+      />
     </div>
   );
 }
