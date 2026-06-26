@@ -12,6 +12,7 @@ export default function BuyerOrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('ALL');
 
   useEffect(() => {
     fetchOrders();
@@ -49,6 +50,17 @@ export default function BuyerOrdersPage() {
     }
   };
 
+  const tabs = [
+    { id: 'ALL', label: 'Semua' },
+    { id: 'SEDANG_DIKEMAS', label: 'Sedang Dikemas' },
+    { id: 'MENUNGGU_PENGIRIM', label: 'Menunggu Pengirim' },
+    { id: 'SEDANG_DIKIRIM', label: 'Sedang Dikirim' },
+    { id: 'PESANAN_SELESAI', label: 'Selesai' },
+    { id: 'DIKEMBALIKAN', label: 'Dikembalikan' },
+  ];
+
+  const filteredOrders = activeTab === 'ALL' ? orders : orders.filter(order => order.status === activeTab);
+
   if (isLoading) {
     return <div className="max-w-7xl mx-auto px-4 py-24 text-center">Loading Orders...</div>;
   }
@@ -58,19 +70,40 @@ export default function BuyerOrdersPage() {
       <div className="max-w-5xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold flex items-center gap-3 text-slate-800 mb-8">
           <ShoppingBag className="w-8 h-8 text-primary" /> 
-          My Orders
+          Pesanan Saya
         </h1>
+
+        {/* Tabs */}
+        <div className="flex overflow-x-auto border-b mb-6 scrollbar-hide">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`whitespace-nowrap px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.id 
+                  ? 'border-primary text-primary' 
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
         {orders.length === 0 ? (
           <div className="text-center py-24 bg-slate-50 rounded-xl border border-dashed">
             <ShoppingBag className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-700 mb-2">No orders yet</h2>
-            <p className="text-slate-500 mb-6">You haven't placed any orders.</p>
-            <Button onClick={() => router.push('/search')} size="lg">Start Shopping</Button>
+            <h2 className="text-2xl font-bold text-slate-700 mb-2">Belum ada pesanan</h2>
+            <p className="text-slate-500 mb-6">Mulai belanja sekarang!</p>
+            <Button onClick={() => router.push('/search')} size="lg">Cari Produk</Button>
+          </div>
+        ) : filteredOrders.length === 0 ? (
+          <div className="text-center py-20 text-slate-500 border rounded-xl border-dashed bg-slate-50">
+            Tidak ada pesanan dengan status ini.
           </div>
         ) : (
           <div className="space-y-6">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <Card key={order.id} className="border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <CardHeader className="border-b py-3 flex flex-row items-center justify-between">
                   <div className="flex items-center gap-2">
