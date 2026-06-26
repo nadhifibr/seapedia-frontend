@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,7 +32,7 @@ const CATEGORY_OPTIONS = [
   { value: 'OTHER', label: 'Other' },
 ];
 
-export default function ProductsPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const queryParam = searchParams.get('q') || '';
 
@@ -506,5 +506,17 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-screen w-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }
