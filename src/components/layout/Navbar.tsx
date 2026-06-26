@@ -21,6 +21,7 @@ export function Navbar() {
 
   const availableRoles = [];
   if (user?.roles && !user.roles.includes('ADMIN')) {
+    if (!user.roles.includes('BUYER')) availableRoles.push('BUYER');
     if (!user.roles.includes('SELLER')) availableRoles.push('SELLER');
     if (!user.roles.includes('DRIVER')) availableRoles.push('DRIVER');
   }
@@ -104,11 +105,15 @@ export function Navbar() {
               <button className="md:hidden text-[#F8FAFC] hover:text-white transition-colors relative flex items-center justify-center h-8 w-8 shrink-0 cursor-pointer" onClick={() => setIsMobileSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </button>
-          <Link href="/cart" className="text-[#F8FAFC] hover:text-white transition-colors relative flex items-center justify-center h-8 w-8 md:h-10 md:w-10">
-            <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
-          </Link>
+          {(!mounted || !user || user.active_role === 'BUYER') && (
+            <>
+              <Link href="/cart" className="text-[#F8FAFC] hover:text-white transition-colors relative flex items-center justify-center h-8 w-8 md:h-10 md:w-10">
+                <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
+              </Link>
 
-          <div className="h-8 w-px bg-[#F8FAFC]/40 mx-1"></div>
+              <div className="h-8 w-px bg-[#F8FAFC]/40 mx-1"></div>
+            </>
+          )}
 
           {mounted && (
             isAuthenticated ? (
@@ -155,6 +160,14 @@ export function Navbar() {
 
                     {availableRoles.length > 0 && (
                       <>
+                        {availableRoles.includes('BUYER') && (
+                          <button
+                            onClick={() => { setSelectedUpgradeRole('BUYER'); setIsUpgradeModalOpen(true); }}
+                            className="w-full text-left px-4 py-2.5 text-sm text-[#0B3D91] hover:bg-blue-50/50 font-medium transition-colors cursor-pointer"
+                          >
+                            Mulai Belanja
+                          </button>
+                        )}
                         {availableRoles.includes('SELLER') && (
                           <button
                             onClick={() => { setSelectedUpgradeRole('SELLER'); setIsUpgradeModalOpen(true); }}
@@ -211,11 +224,13 @@ export function Navbar() {
           <div className="relative bg-white shadow-2xl rounded-2xl w-full max-w-sm p-6 overflow-hidden transform transition-all">
             <div className="relative z-10">
               <h3 className="text-xl font-bold text-slate-900 mb-2">
-                {selectedUpgradeRole === 'SELLER' ? 'Buka Toko Sekarang?' : 'Jadi Driver Sekarang?'}
+                {selectedUpgradeRole === 'SELLER' ? 'Buka Toko Sekarang?' : selectedUpgradeRole === 'BUYER' ? 'Mulai Belanja Sekarang?' : 'Jadi Driver Sekarang?'}
               </h3>
               <p className="text-slate-600 text-sm mb-6 leading-relaxed">
                 {selectedUpgradeRole === 'SELLER' 
                   ? 'Tingkatkan akunmu untuk mulai berjualan dan jangkau lebih banyak pelanggan di Seapedia. Gratis!' 
+                  : selectedUpgradeRole === 'BUYER'
+                  ? 'Aktifkan akun pembeli untuk menikmati kemudahan belanja dengan berbagai pilihan produk berkualitas!'
                   : 'Bergabunglah menjadi mitra pengemudi kami dan dapatkan penghasilan tambahan setiap harinya.'}
               </p>
               
