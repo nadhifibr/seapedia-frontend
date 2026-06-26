@@ -146,7 +146,7 @@ export default function AdminDashboardPage() {
       { header: 'Email', accessor: 'email' },
       { header: 'Roles', accessor: 'roles', render: (val: string[]) => (
         <div className="flex gap-1 flex-wrap">
-          {val.map(r => <span key={r} className="px-2 py-1 text-xs bg-slate-100 rounded-full">{r}</span>)}
+          {val?.map(r => <span key={r} className="px-2 py-1 text-xs bg-slate-100 rounded-full">{r}</span>)}
         </div>
       )},
       { header: 'Wallet Balance', accessor: 'wallet_balance', render: (val: string) => `Rp ${val}` }
@@ -223,7 +223,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex justify-between items-start">
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
             <Activity className="h-8 w-8 text-primary" />
@@ -231,7 +231,7 @@ export default function AdminDashboardPage() {
           </h1>
           <p className="text-slate-500 mt-2">Marketplace Overview & Statistics</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <button 
             onClick={async () => {
               try {

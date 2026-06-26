@@ -31,7 +31,7 @@ export default function DiscountsManagementPage() {
         <Link href="/dashboard/admin" className="text-sm font-medium text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-4">
           <ArrowLeft className="h-4 w-4" /> Back to Dashboard
         </Link>
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
               <Ticket className="h-8 w-8 text-primary" />
@@ -39,7 +39,7 @@ export default function DiscountsManagementPage() {
             </h1>
             <p className="text-slate-500 mt-2">Manage Vouchers and Promos across the marketplace</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3 w-full md:w-auto">
             <Link 
               href="/dashboard/admin/discounts/vouchers/new"
               className="bg-primary text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
