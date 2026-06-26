@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Fish, ArrowLeft, Store as StoreIcon, ShieldCheck, Star } from 'lucide-react';
+import { Fish, ArrowLeft, Store as StoreIcon, ShieldCheck, Star, ChevronRight, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,7 @@ export default function ProductDetailPage() {
   const { user } = useAuthStore();
   const [product, setProduct] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [stats, setStats] = useState({ average_rating: 0, total_reviews: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -49,11 +50,24 @@ export default function ProductDetailPage() {
     try {
       const res = await api.get(`/products/${productId}/`);
       setProduct(res.data);
+      if (res.data.category) {
+        fetchRelatedProducts(res.data.category, productId);
+      }
     } catch (err) {
       console.error('Failed to fetch product detail', err);
       // fallback or error could be shown
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchRelatedProducts = async (category: string, currentProductId: string) => {
+    try {
+      const res = await api.get(`/products/?category=${category}`);
+      const filtered = res.data.results.filter((p: any) => p.id.toString() !== currentProductId).slice(0, 5);
+      setRelatedProducts(filtered);
+    } catch (err) {
+      console.error('Failed to fetch related products', err);
     }
   };
 
@@ -112,14 +126,24 @@ export default function ProductDetailPage() {
     );
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <Button variant="ghost" onClick={() => router.push('/search')} className="mb-6 -ml-4 text-muted-foreground">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Catalog
-      </Button>
+  const soldCount = product.sold_count || 0;
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center text-sm text-slate-500 mb-8 font-medium">
+        <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+        <ChevronRight className="w-4 h-4 mx-1" />
+        <Link href="/search" className="hover:text-primary transition-colors">Browse</Link>
+        <ChevronRight className="w-4 h-4 mx-1" />
+        <Link href={`/search?category=${product.category}`} className="hover:text-primary transition-colors capitalize">
+          {product.category?.replace('_', ' ').toLowerCase()}
+        </Link>
+        <ChevronRight className="w-4 h-4 mx-1" />
+        <span className="text-slate-900 truncate max-w-[200px] md:max-w-md">{product.name}</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
         {/* Product Image */}
         <div className="bg-slate-100 rounded-xl aspect-square flex items-center justify-center overflow-hidden border">
           {product.image_url ? (
@@ -133,66 +157,33 @@ export default function ProductDetailPage() {
         <div className="flex flex-col">
           <div className="mb-6">
             <h1 className="text-4xl font-extrabold text-slate-900 mb-2">{product.name}</h1>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-600">
-                {product.category?.replace('_', ' ')}
+            
+            <div className="flex items-center gap-3 mb-4 text-sm font-medium text-slate-600 divide-x divide-slate-300">
+              <div className="pr-3">
+                <span className="text-slate-900 font-bold">{soldCount}</span> terjual
               </div>
-              <div className="flex items-center text-sm font-medium text-slate-600">
+              <div className="flex items-center pl-3">
                 <Star className="w-4 h-4 text-amber-400 fill-amber-400 mr-1" />
-                {stats.average_rating > 0 ? stats.average_rating : 'New'} 
+                <span className="text-slate-900 font-bold">{stats.average_rating > 0 ? stats.average_rating : 'New'}</span>
                 <span className="text-slate-400 ml-1">({stats.total_reviews} reviews)</span>
               </div>
             </div>
+
             <div className="text-3xl font-bold text-primary mb-4">Rp {Number(product.price).toLocaleString('id-ID')}</div>
             
             <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-6 ${product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
               {product.stock > 0 ? `${product.stock} items in stock` : 'Out of Stock'}
             </div>
             
-            <p className="text-slate-600 whitespace-pre-line leading-relaxed">
-              {product.description}
-            </p>
+            <div className="text-slate-700 whitespace-pre-line leading-relaxed border-t pt-6">
+              <h3 className="font-semibold text-lg mb-2">Description</h3>
+              <p>{product.description}</p>
+            </div>
           </div>
 
-          <div className="mt-auto space-y-6">
-            {/* Store Card */}
-            {product.store ? (
-              <Link href={`/store/${product.store.slug}`} className="block">
-                <Card className="bg-slate-50 border-none shadow-sm hover:bg-slate-100 transition-colors">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2 text-slate-900">
-                      <StoreIcon className="w-5 h-5 text-primary" />
-                      Sold by: {product.store.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-4">
-                      {product.store.image_url && (
-                        <img src={product.store.image_url} alt={product.store.name} className="w-16 h-16 rounded object-cover shadow-sm" />
-                      )}
-                      <div>
-                        <p className="text-sm text-slate-600 line-clamp-2">{product.store.description || 'No description available for this store.'}</p>
-                        <div className="flex items-center gap-1 text-xs text-green-600 font-medium mt-2">
-                          <ShieldCheck className="w-4 h-4" /> SEAPEDIA Verified Seller
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ) : (
-              <Card className="bg-slate-50 border-none shadow-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <StoreIcon className="w-5 h-5 text-primary" />
-                    Sold by: Unknown Store
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-            )}
-
+          <div className="mt-auto pt-6">
             {/* Actions */}
-            <div className="pt-6 border-t flex flex-col gap-4">
+            <div className="flex flex-col gap-4">
               {product.stock > 0 && user && user.roles.includes('BUYER') && (
                 <div className="flex items-center gap-4 mb-2">
                   <span className="text-sm font-medium text-slate-700">Quantity:</span>
@@ -238,8 +229,147 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
+      {/* Store Information Section */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-bold mb-6 border-b pb-2">Store Information</h2>
+        {product.store ? (
+          <Card className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-0">
+              <div className="flex flex-col md:flex-row">
+                <div className="p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-slate-100 flex flex-col justify-center">
+                  <div className="flex items-center gap-4 mb-4">
+                    {product.store.image_url ? (
+                      <img src={product.store.image_url} alt={product.store.name} className="w-16 h-16 rounded-full object-cover shadow-sm border" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
+                        <StoreIcon className="w-8 h-8 text-slate-400" />
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-900">{product.store.name}</h3>
+                      <div className="flex items-center gap-1 text-xs text-green-600 font-medium mt-1">
+                        <ShieldCheck className="w-4 h-4" /> Verified Seller
+                      </div>
+                    </div>
+                  </div>
+                  {product.store.location && (
+                    <div className="flex items-start gap-2 text-sm text-slate-600 mb-4">
+                      <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                      <span className="capitalize">{product.store.location?.toLowerCase()}</span>
+                    </div>
+                  )}
+                  <Button render={<Link href={`/store/${product.store.slug}`} />} variant="outline" className="w-full">
+                    Visit Store
+                  </Button>
+                </div>
+                
+                <div className="p-6 md:w-2/3 bg-slate-50/50">
+                  <h4 className="text-sm font-semibold text-slate-900 mb-4">More from this store</h4>
+                  {product.store.recent_products && product.store.recent_products.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      {product.store.recent_products.filter((p: any) => p.id !== product.id).slice(0, 3).map((p: any) => (
+                        <Link href={`/products/${p.id}`} key={p.id} className="block group/item h-full">
+                          <Card className="h-full overflow-hidden flex flex-col bg-transparent border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
+                            <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden rounded-[10px]">
+                              {p.image_url ? (
+                                <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" />
+                              ) : (
+                                <Fish className="w-8 h-8 opacity-50" />
+                              )}
+                              {p.stock === 0 && (
+                                <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-bold z-10">
+                                  HABIS
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-2.5 md:p-3 flex flex-col flex-grow">
+                              <h3 className="text-[13px] md:text-sm text-slate-800 line-clamp-2 leading-tight">
+                                {p.name}
+                              </h3>
+                              <div className="text-sm md:text-base font-bold text-slate-900 mt-1 mb-1">
+                                Rp {Number(p.price).toLocaleString('id-ID')}
+                              </div>
+                            </div>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500">No other products found.</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="p-6 bg-slate-50 rounded-xl text-center text-slate-500">
+            Store information not available.
+          </div>
+        )}
+      </div>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-6 border-b pb-2">
+            <h2 className="text-2xl font-bold">Similar Products</h2>
+            <Link href={`/search?category=${product.category}`} className="text-sm text-primary hover:underline font-medium flex items-center">
+              View All <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {relatedProducts.map((p: any) => (
+              <Link href={`/products/${p.id}`} key={p.id} className="block group/item h-full">
+                <Card className="h-full overflow-hidden flex flex-col bg-transparent border-none ring-0 p-0 gap-0 shadow-none transition-all duration-300 rounded-[10px]">
+                  <div className="aspect-square bg-slate-50 flex items-center justify-center text-slate-300 relative overflow-hidden rounded-[10px]">
+                    {p.image_url ? (
+                      <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <Fish className="w-12 h-12 opacity-50" />
+                    )}
+                    {p.stock === 0 && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-bold z-10">
+                        HABIS
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2.5 md:p-3 flex flex-col flex-grow">
+                    <h3 className="text-[13px] md:text-sm text-slate-800 line-clamp-2 leading-tight">
+                      {p.name}
+                    </h3>
+                    <div className="text-sm md:text-base font-bold text-slate-900 mt-1 mb-1">
+                      Rp {Number(p.price).toLocaleString('id-ID')}
+                    </div>
+                    <div className="mt-auto pt-1 flex flex-col gap-1.5 text-[11px] text-slate-500">
+                      {p.store && (
+                        <div className="relative h-[16px] overflow-hidden w-full flex items-center text-slate-500 cursor-default">
+                          <div className="absolute inset-0 flex items-center transition-transform duration-300 group-hover/item:-translate-y-full">
+                            <StoreIcon className="w-3 h-3 mr-1" />
+                            <span className="line-clamp-1">{p.store.name}</span>
+                          </div>
+                          <div className="absolute inset-0 flex items-center transition-transform duration-300 translate-y-full group-hover/item:translate-y-0 text-slate-600">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            <span className="line-clamp-1">{p.store.location ? p.store.location.replace('_', ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase()) : 'Unknown'}</span>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center">
+                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400 mr-1" />
+                        <span>{p.average_rating > 0 ? p.average_rating : '-'}</span>
+                        <span className="mx-1.5 text-slate-300 text-[10px]">|</span>
+                        <span>{p.sold_count || 0} terjual</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Reviews Section */}
-      <div className="mt-16">
+      <div>
         <h2 className="text-2xl font-bold mb-6 border-b pb-2">Customer Reviews</h2>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
