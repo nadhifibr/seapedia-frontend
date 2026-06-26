@@ -119,7 +119,7 @@ export default function AppReviewsPage() {
                   />
                 </div>
 
-                <Button type="submit" className="w-full">Submit Review</Button>
+                <Button type="submit" className="w-full cursor-pointer">Submit Review</Button>
               </form>
             </CardContent>
           </Card>
