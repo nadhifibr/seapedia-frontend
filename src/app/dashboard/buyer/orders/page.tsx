@@ -72,10 +72,12 @@ export default function BuyerOrdersPage() {
           <div className="space-y-6">
             {orders.map((order) => (
               <Card key={order.id} className="border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="bg-slate-50 border-b py-3 flex flex-row items-center justify-between">
-                  <div>
-                    <span className="text-sm text-slate-500 mr-2">Order ID:</span>
-                    <span className="font-mono text-xs font-semibold text-slate-700">{order.id}</span>
+                <CardHeader className="border-b py-3 flex flex-row items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm font-medium text-slate-700">
+                      {order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pesanan Belanja'}
+                    </span>
                   </div>
                   <div>{getStatusBadge(order.status)}</div>
                 </CardHeader>
@@ -114,7 +116,7 @@ export default function BuyerOrdersPage() {
                           Deliver to: {order.address_snapshot}
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full mt-4" onClick={() => router.push(`/dashboard/buyer/orders/${order.id}`)}>
+                      <Button variant="outline" className="w-full mt-4 cursor-pointer" onClick={() => router.push(`/dashboard/buyer/orders/${order.id}`)}>
                         View Details <ChevronRight className="w-4 h-4 ml-1" />
                       </Button>
                     </div>

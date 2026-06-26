@@ -75,7 +75,7 @@ export default function BuyerOrderDetailPage({ params }: { params: Promise<{ id:
           <div className="md:col-span-2 space-y-6">
             {/* Products List */}
             <Card className="border-slate-200 shadow-sm">
-              <CardHeader className="bg-slate-50 border-b py-3">
+              <CardHeader className="border-b py-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Store className="w-5 h-5 text-primary" />
                   {order.store_name}
@@ -107,7 +107,7 @@ export default function BuyerOrderDetailPage({ params }: { params: Promise<{ id:
 
             {/* Delivery Info */}
             <Card className="border-slate-200 shadow-sm">
-              <CardHeader className="bg-slate-50 border-b py-3">
+              <CardHeader className="border-b py-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-primary" />
                   Delivery Information
@@ -129,7 +129,7 @@ export default function BuyerOrderDetailPage({ params }: { params: Promise<{ id:
           <div className="space-y-6">
             {/* Payment Summary */}
             <Card className="border-slate-200 shadow-sm">
-              <CardHeader className="bg-slate-50 border-b py-3">
+              <CardHeader className="border-b py-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-primary" />
                   Payment Summary
@@ -163,7 +163,7 @@ export default function BuyerOrderDetailPage({ params }: { params: Promise<{ id:
 
             {/* Order Timeline / History */}
             <Card className="border-slate-200 shadow-sm">
-              <CardHeader className="bg-slate-50 border-b py-3">
+              <CardHeader className="border-b py-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Clock className="w-5 h-5 text-primary" />
                   Order History
@@ -178,7 +178,9 @@ export default function BuyerOrderDetailPage({ params }: { params: Promise<{ id:
                       )}
                       <div className="w-3 h-3 rounded-full bg-primary mt-1.5 shrink-0 relative z-10 ring-4 ring-white"></div>
                       <div>
-                        <p className="font-semibold text-slate-800 text-sm">{history.status}</p>
+                        <p className="font-semibold text-slate-800 text-sm">
+                          {history.status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                        </p>
                         <p className="text-xs text-slate-500 mt-0.5">{new Date(history.changed_at).toLocaleString()}</p>
                         {history.note && <p className="text-xs text-slate-600 mt-1">{history.note}</p>}
                       </div>

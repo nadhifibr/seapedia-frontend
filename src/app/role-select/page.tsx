@@ -49,9 +49,9 @@ export default function RoleSelectPage() {
 
   const getRoleImage = (role: string) => {
     switch (role) {
-      case 'BUYER': return '/categories/fishing_gear 1.png';
-      case 'SELLER': return '/categories/marine_equipment 1.png';
-      case 'DRIVER': return '/categories/ocean_accessories 1.png';
+      case 'BUYER': return '/buyer.png';
+      case 'SELLER': return 'seller.png';
+      case 'DRIVER': return '/driver.png';
       case 'ADMIN': return '/categories/other_marine 1.png';
       default: return '/categories/ocean_apparel 1.png';
     }

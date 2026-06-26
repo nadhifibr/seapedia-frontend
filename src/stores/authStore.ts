@@ -5,6 +5,7 @@ export interface UserProfile {
   id: string;
   username: string;
   email: string;
+  created_at: string;
   roles: string[];
   active_role: string;
   financial_summaries?: {
