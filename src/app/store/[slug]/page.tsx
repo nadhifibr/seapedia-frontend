@@ -152,12 +152,22 @@ export default function StoreProfilePage() {
                   <ShieldCheck className="w-6 h-6 text-green-500" />
                 </span>
               </h1>
-              {store.location && (
-                <div className="flex items-center text-sm font-medium text-slate-500 mt-1 capitalize">
-                  <MapPin className="w-4 h-4 mr-1 text-primary" />
-                  {store.location.replace('_', ' ').toLowerCase()}
+              <div className="flex flex-wrap items-center gap-4 mt-2">
+                {store.location && (
+                  <div className="flex items-center text-sm font-medium text-slate-500 capitalize">
+                    <MapPin className="w-4 h-4 mr-1 text-primary" />
+                    {store.location.replace('_', ' ').toLowerCase()}
+                  </div>
+                )}
+                <div className="flex items-center text-sm font-medium text-slate-500">
+                  <Star className="w-4 h-4 mr-1 text-yellow-400 fill-yellow-400" />
+                  {store.average_rating > 0 ? Number(store.average_rating).toFixed(1) : '-'} Rating
                 </div>
-              )}
+                <div className="flex items-center text-sm font-medium text-slate-500">
+                  <StoreIcon className="w-4 h-4 mr-1 text-primary" />
+                  {store.total_sold || 0} Terjual
+                </div>
+              </div>
               <p className="text-slate-600 mt-3 max-w-3xl leading-relaxed">
                 {store.description || 'Welcome to our store! Browse our high-quality products below.'}
               </p>
