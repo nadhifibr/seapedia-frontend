@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info } from 'lucide-react';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ export function ConfirmationModal({
         <div className="p-6">
           <div className="flex items-start gap-4">
             <div className={`p-3 rounded-full shrink-0 ${isDestructive ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary'}`}>
-              <AlertTriangle className="w-6 h-6" />
+              {isDestructive ? <AlertTriangle className="w-6 h-6" /> : <Info className="w-6 h-6" />}
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">{title}</h3>

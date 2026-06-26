@@ -334,6 +334,7 @@ export default function CheckoutPage() {
         message={`Are you sure you want to place this order? Your total is Rp ${summary?.total ? Number(summary.total).toLocaleString('id-ID') : 0}.`}
         confirmText="Yes, Checkout"
         cancelText="Cancel"
+        isDestructive={false}
       />
 
       <ToastNotification 

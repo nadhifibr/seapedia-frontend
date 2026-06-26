@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/shared/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Package, DollarSign, Store, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Package, Store, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function DriverJobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { fetchProfile } = useAuthStore();
   const { id } = use(params);
   const [job, setJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,6 +51,7 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
       setIsProcessing(true);
       await api.post(`/deliveries/jobs/${id}/complete/`);
       await fetchJobDetails();
+      await fetchProfile();
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Failed to complete job.');
     } finally {
@@ -65,8 +68,8 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
   return (
     <ProtectedRoute allowedRoles={['DRIVER']}>
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <Button variant="ghost" onClick={() => router.push('/dashboard/driver')} className="mb-6 -ml-4">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
+        <Button variant="ghost" onClick={() => router.push('/dashboard/driver/orders')} className="mb-6 -ml-4 cursor-pointer">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Orders
         </Button>
 
         <div className="flex justify-between items-start mb-6">
@@ -75,7 +78,6 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
             <p className="text-slate-500 mt-1">Delivery Method: <span className="font-semibold text-slate-700">{job.delivery_method}</span></p>
           </div>
           <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg flex items-center gap-2 border border-green-200">
-            <DollarSign className="w-5 h-5" />
             <span className="text-2xl font-black">Rp {Number(job.driver_earning).toLocaleString('id-ID')}</span>
           </div>
         </div>
@@ -89,11 +91,12 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="relative pl-8 space-y-8 before:absolute before:inset-0 before:ml-[1.4rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+              <div className="flex flex-col gap-8 relative">
+                <div className="absolute left-[11px] top-8 bottom-8 w-0.5 bg-slate-200 z-0"></div>
                 
                 {/* Pickup */}
-                <div className="relative">
-                  <div className="absolute -left-10 bg-primary w-6 h-6 rounded-full border-4 border-white shadow flex items-center justify-center">
+                <div className="flex gap-4 relative z-10">
+                  <div className="bg-primary w-6 h-6 rounded-full border-4 border-white shadow flex items-center justify-center shrink-0 mt-1">
                     <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                   </div>
                   <div>
@@ -105,8 +108,8 @@ export default function DriverJobDetailPage({ params }: { params: Promise<{ id: 
                 </div>
 
                 {/* Dropoff */}
-                <div className="relative">
-                  <div className="absolute -left-10 bg-green-500 w-6 h-6 rounded-full border-4 border-white shadow flex items-center justify-center">
+                <div className="flex gap-4 relative z-10">
+                  <div className="bg-green-500 w-6 h-6 rounded-full border-4 border-white shadow flex items-center justify-center shrink-0 mt-1">
                     <CheckCircle className="w-3 h-3 text-white" />
                   </div>
                   <div>

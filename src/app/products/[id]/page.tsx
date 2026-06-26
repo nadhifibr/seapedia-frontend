@@ -225,14 +225,18 @@ export default function ProductDetailPage() {
                 <Button 
                   size="lg" 
                   className="flex-1 cursor-pointer" 
-                  disabled={product.stock === 0 || !user || !user.roles.includes('BUYER') || isAddingToCart}
+                  disabled={product.stock === 0 || !user || user.active_role !== 'BUYER' || isAddingToCart}
                   onClick={handleAddToCart}
                 >
                   {isAddingToCart ? 'Adding...' : (product.stock === 0 ? 'Out of Stock' : `Add to Cart - Rp ${(Number(product.price) * quantity).toLocaleString('id-ID')}`)}
                 </Button>
-                {!user && (
+                {(!user || user.active_role !== 'BUYER') && (
                   <div className="text-center sm:text-left text-sm text-slate-500 self-center">
-                    <Link href="/auth/login" className="text-primary hover:underline">Log in</Link> as a buyer to purchase.
+                    {!user ? (
+                      <><Link href="/auth/login" className="text-primary hover:underline">Log in</Link> as a buyer to purchase.</>
+                    ) : (
+                      <>Switch to <strong>Buyer</strong> role to purchase.</>
+                    )}
                   </div>
                 )}
               </div>
