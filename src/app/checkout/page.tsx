@@ -123,7 +123,7 @@ export default function CheckoutPage() {
             
             {/* Address Selection */}
             <Card className="border-slate-200 shadow-sm">
-              <CardHeader className="bg-slate-50 border-b py-3">
+              <CardHeader className="border-b py-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-primary" />
                   Delivery Address
@@ -160,7 +160,7 @@ export default function CheckoutPage() {
 
             {/* Delivery Method Selection */}
             <Card className="border-slate-200 shadow-sm">
-              <CardHeader className="bg-slate-50 border-b py-3">
+              <CardHeader className="border-b py-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Truck className="w-5 h-5 text-primary" />
                   Delivery Method
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
             {/* Order Items */}
             {summary && (
               <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="bg-slate-50 border-b py-3">
+                <CardHeader className="border-b py-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <ShoppingBag className="w-5 h-5 text-primary" />
                     Items from {summary.store_name}
@@ -239,7 +239,7 @@ export default function CheckoutPage() {
             
             {/* Discount Code Section */}
             <Card className="border-slate-200 shadow-sm">
-              <CardHeader className="bg-slate-50 border-b py-3">
+              <CardHeader className="border-b py-3">
                 <CardTitle className="text-lg">Voucher & Promo</CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-3">
@@ -251,7 +251,7 @@ export default function CheckoutPage() {
                     placeholder="Enter code"
                     className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 uppercase"
                   />
-                  <Button onClick={handleApplyDiscount} disabled={isApplyingDiscount || !discountCodeInput}>
+                  <Button onClick={handleApplyDiscount} disabled={isApplyingDiscount || !discountCodeInput} className="cursor-pointer">
                     {isApplyingDiscount ? '...' : 'Apply'}
                   </Button>
                 </div>
@@ -259,7 +259,7 @@ export default function CheckoutPage() {
                 {appliedDiscountCode && summary?.discount_amount > 0 && (
                   <div className="bg-green-50 border border-green-200 text-green-700 p-2 rounded-md text-sm mt-2 flex justify-between items-center">
                     <span>Applied: <strong>{appliedDiscountCode}</strong></span>
-                    <Button variant="ghost" size="sm" className="h-6 px-2 text-red-600 hover:text-red-800 hover:bg-red-50" onClick={() => { setAppliedDiscountCode(''); setDiscountCodeInput(''); }}>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 text-red-600 hover:text-red-800 hover:bg-red-50 cursor-pointer" onClick={() => { setAppliedDiscountCode(''); setDiscountCodeInput(''); }}>
                       Remove
                     </Button>
                   </div>
@@ -268,8 +268,8 @@ export default function CheckoutPage() {
             </Card>
 
             {/* Payment Summary */}
-            <Card className="sticky top-24 shadow-md border-primary/20">
-              <CardHeader className="bg-primary/5 pb-4">
+            <Card className="sticky top-24 shadow-md border-slate-200">
+              <CardHeader className="pb-4">
                 <CardTitle>Payment Summary</CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-3 text-slate-600">
@@ -303,7 +303,7 @@ export default function CheckoutPage() {
                 )}
                 
                 <Button 
-                  className="w-full mt-6" 
+                  className="w-full mt-6 cursor-pointer" 
                   size="lg" 
                   onClick={handleCheckout} 
                   disabled={!summary || !selectedAddressId || isSubmitting}
