@@ -36,6 +36,7 @@ export default function ProductDetailPage() {
   const [toastConfig, setToastConfig] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (id) {
       fetchProduct(id as string);
       fetchReviews(id as string);

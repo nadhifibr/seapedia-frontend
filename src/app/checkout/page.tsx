@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/shared/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Truck, CheckCircle2, ShoppingBag } from 'lucide-react';
+import { Truck, CheckCircle2, ShoppingBag, MapPin } from 'lucide-react';
 import api from '@/lib/api';
+import { ConfirmationModal } from '@/components/shared/ConfirmationModal';
+import { ToastNotification } from '@/components/shared/ToastNotification';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -21,6 +23,9 @@ export default function CheckoutPage() {
   const [appliedDiscountCode, setAppliedDiscountCode] = useState('');
   const [discountError, setDiscountError] = useState('');
   const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
+  
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [toast, setToast] = useState<{show: boolean, message: string}>({ show: false, message: '' });
 
   useEffect(() => {
     fetchAddresses();
@@ -84,10 +89,7 @@ export default function CheckoutPage() {
   };
 
   const handleCheckout = async () => {
-    if (!selectedAddressId) {
-      alert('Please select a delivery address');
-      return;
-    }
+    setIsConfirmModalOpen(false);
     
     try {
       setIsSubmitting(true);
@@ -96,11 +98,13 @@ export default function CheckoutPage() {
         address_id: selectedAddressId,
         discount_code: appliedDiscountCode
       });
-      alert('Order placed successfully!');
-      router.push('/dashboard/buyer/orders');
+      setToast({ show: true, message: 'Order placed successfully!' });
+      setTimeout(() => {
+        router.push('/dashboard/buyer/orders');
+      }, 1500);
     } catch (err: any) {
       console.error('Checkout failed', err);
-      alert(err.response?.data?.detail || 'Checkout failed. Please try again.');
+      setToast({ show: true, message: err.response?.data?.detail || 'Checkout failed. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -305,7 +309,13 @@ export default function CheckoutPage() {
                 <Button 
                   className="w-full mt-6 cursor-pointer" 
                   size="lg" 
-                  onClick={handleCheckout} 
+                  onClick={() => {
+                    if (!selectedAddressId) {
+                      setToast({ show: true, message: 'Please select a delivery address' });
+                      return;
+                    }
+                    setIsConfirmModalOpen(true);
+                  }} 
                   disabled={!summary || !selectedAddressId || isSubmitting}
                 >
                   {isSubmitting ? 'Processing...' : 'Pay Now'}
@@ -315,6 +325,22 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleCheckout}
+        title="Confirm Checkout"
+        message={`Are you sure you want to place this order? Your total is Rp ${summary?.total ? Number(summary.total).toLocaleString('id-ID') : 0}.`}
+        confirmText="Yes, Checkout"
+        cancelText="Cancel"
+      />
+
+      <ToastNotification 
+        show={toast.show}
+        message={toast.message}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
     </ProtectedRoute>
   );
 }
