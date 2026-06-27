@@ -269,8 +269,8 @@ export default function LandingPage() {
               <h3 className="text-2xl font-bold text-slate-900 mb-4 text-center">
                 Attention to Tester!
               </h3>
-              <p className="text-slate-600 text-sm mb-8 leading-relaxed text-center">
-                Aplikasi ini terhubung ke <i>server backend</i> yang mungkin sedang dalam keadaan <span className="font-semibold text-slate-800">offline/tidur</span>. Mohon hubungi pembuat aplikasi terlebih dahulu agar <span className="font-semibold text-slate-800">server backend</span> dapat diaktifkan kembali dan kamu bisa menikmati pengalaman penuh fitur-fiturnya!
+              <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+                Aplikasi ini terhubung ke <i>server backend</i> yang mungkin sedang <span className="font-semibold text-slate-800">mengalami sedikit antrean atau *loading* lama</span>. Mohon tunggu beberapa saat karena server sedang memproses permintaan Anda, setelah itu Anda bisa menikmati pengalaman penuh fitur-fiturnya!
               </p>
               
               <div className="flex justify-center gap-4 mb-8">
