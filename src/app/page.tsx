@@ -97,34 +97,34 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Banner Section (Dummy) */}
-      <section className="pt-8 px-4">
+      <section className="pt-4 md:pt-8 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Rectangle Banner */}
-          <div className={`group relative w-full h-[250px] sm:h-[350px] md:h-[450px] rounded-[20px] ${slides[currentSlide]} flex items-center justify-between px-4 md:px-8 shadow-lg overflow-hidden transition-colors duration-700 ease-in-out`}>
+          <div className={`group relative w-full aspect-[16/7] md:aspect-auto md:h-[450px] rounded-[12px] md:rounded-[20px] ${slides[currentSlide]} flex items-center justify-between px-2 md:px-8 shadow-lg overflow-hidden transition-all duration-700 ease-in-out`}>
             
             {/* Left Navigation Button */}
             <button 
               onClick={prevSlide}
-              className="opacity-0 group-hover:opacity-100 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all duration-300 border border-white/20 cursor-pointer"
+              className="opacity-0 group-hover:opacity-100 z-10 w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all duration-300 border border-white/20 cursor-pointer"
             >
-              <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+              <ChevronLeft className="w-5 h-5 md:w-8 md:h-8" />
             </button>
             
             {/* Right Navigation Button */}
             <button 
               onClick={nextSlide}
-              className="opacity-0 group-hover:opacity-100 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all duration-300 border border-white/20 cursor-pointer"
+              className="opacity-0 group-hover:opacity-100 z-10 w-8 h-8 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all duration-300 border border-white/20 cursor-pointer"
             >
-              <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+              <ChevronRight className="w-5 h-5 md:w-8 md:h-8" />
             </button>
 
             {/* Pagination dots */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-2 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2">
               {slides.map((_, idx) => (
                 <div 
                   key={idx} 
                   onClick={() => setCurrentSlide(idx)}
-                  className={`h-2 rounded-full cursor-pointer transition-all duration-300 ${idx === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                  className={`h-1.5 md:h-2 rounded-full cursor-pointer transition-all duration-300 ${idx === currentSlide ? 'w-4 md:w-8 bg-white' : 'w-1.5 md:w-2 bg-white/40 hover:bg-white/60'}`}
                 ></div>
               ))}
             </div>
