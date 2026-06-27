@@ -49,6 +49,7 @@ const categories = [
 export default function LandingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [appReviews, setAppReviews] = useState<any[]>([]);
   const [showTesterModal, setShowTesterModal] = useState(false);
   
   const slides = [
@@ -77,7 +78,18 @@ export default function LandingPage() {
         console.error("Failed to fetch products", err);
       }
     };
+    
+    const fetchReviews = async () => {
+      try {
+        const res = await api.get('/reviews/');
+        setAppReviews(res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch reviews", err);
+      }
+    };
+
     fetchProducts();
+    fetchReviews();
 
     return () => clearInterval(timer);
   }, []);
@@ -244,19 +256,51 @@ export default function LandingPage() {
 
       
 
-      {/* Review Placeholder */}
-      {/* <section className="bg-slate-900 py-24 px-4 text-white">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h2 className="text-3xl font-bold">Help Us Improve!</h2>
-          <p className="text-slate-300">
-            SEAPEDIA is currently in early access. We would love to hear your feedback about the application experience.
-          </p>
-          <Link href="/reviews">
-            <Button size="lg" variant="secondary" className="h-12 px-8 text-lg">Leave an App Review</Button>
-          </Link>
-        </div>
-      </section> */}
-
+      {/* App Reviews Infinite Marquee */}
+      {appReviews.length > 0 && (
+        <section className="bg-slate-900 py-20 px-4 overflow-hidden relative">
+          <div className="max-w-7xl mx-auto mb-12 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">What they said about Seapedia</h2>
+            <p className="text-slate-400">Discover why thousands of ocean enthusiasts choose us.</p>
+          </div>
+          
+          <div className="relative flex overflow-x-hidden group">
+            <div className="flex animate-marquee gap-6 whitespace-nowrap pl-6 cursor-pointer" onClick={() => window.location.href = '/reviews'}>
+              {/* Double array to create infinite seamless loop */}
+              {[...appReviews, ...appReviews, ...appReviews].map((review, idx) => (
+                <Card key={`${review.id}-${idx}`} className="w-[350px] shrink-0 bg-slate-800/50 border-slate-700 hover:bg-slate-800 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex text-yellow-400 mb-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-slate-600'}`} />
+                      ))}
+                    </div>
+                    <p className="text-slate-300 text-sm italic whitespace-normal line-clamp-3 mb-6">"{review.comment}"</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-slate-300">
+                        {review.reviewer_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-200 text-sm">{review.reviewer_name}</p>
+                        <p className="text-slate-500 text-xs">{new Date(review.created_at).toLocaleDateString('id-ID')}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            {/* Left and Right Fade Overlays */}
+            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-slate-900 to-transparent pointer-events-none"></div>
+            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-slate-900 to-transparent pointer-events-none"></div>
+          </div>
+          
+          <div className="mt-12 text-center relative z-10">
+            <Link href="/reviews">
+              <Button size="lg" variant="secondary" className="bg-white text-slate-900 hover:bg-slate-200 h-12 px-8 cursor-pointer">Read All Reviews</Button>
+            </Link>
+          </div>
+        </section>
+      )}
       {/* Tester Modal */}
       {showTesterModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
