@@ -12,13 +12,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     template: "%s | Seapedia",
-    default: "Seapedia | Marketplace Kebutuhan Laut & Pantai",
+    default: "Seapedia Marketplace",
   },
   description: "Seapedia adalah platform e-commerce terbaik untuk produk kelautan, peralatan memancing, perlengkapan selam, dan gaya hidup pantai. Temukan produk berkualitas dengan harga terbaik.",
   keywords: ["seapedia", "ecommerce", "marine products", "fishing gear", "diving equipment", "ocean lifestyle", "marketplace laut", "peralatan pancing", "alat selam"],
   authors: [{ name: "Seapedia Team" }],
   openGraph: {
-    title: "Seapedia | Marketplace Kebutuhan Laut",
+    title: "Seapedia Marketplace",
     description: "Platform e-commerce terbaik untuk produk kelautan, peralatan memancing, dan perlengkapan selam.",
     url: "https://seapedia.online",
     siteName: "Seapedia",
