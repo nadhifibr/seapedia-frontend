@@ -28,8 +28,7 @@ export function Navbar() {
 
   useEffect(() => {
     setMounted(true);
-    fetchProfile();
-  }, [fetchProfile]);
+  }, []);
 
   const handleLogout = () => {
     logout();
